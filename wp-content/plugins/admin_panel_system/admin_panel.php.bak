@@ -1,0 +1,1655 @@
+<?php
+
+/*
+* Plugin Name: SP Admin
+* Plugin URI: https://agenciasp.com
+* Description: Panel administartivo
+* Version: 1.1.0
+* Author: Agencia Digital SP
+* Author URI: https://agenciasp.com
+* License:
+*/
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+define('ADPNSY_VER', '1.1.0');
+define('ADPNSY_PATH', realpath( dirname(__FILE__) ) );
+define('ADPNSY_URL', plugins_url('/', __FILE__) );
+
+require_once 'admin_license.php';
+require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+if ( class_exists('admin_panel_system')){
+	class adpnsy extends admin_panel_system {
+		public function __construct(){
+			add_action('admin_menu', array($this, 'menu_register'));
+			add_action('wp_ajax_admin_panel', array($this, 'ajax'));
+			add_action('wp_ajax_nopriv_admin_panel', array($this, 'ajax'));
+			register_nav_menu( 'admin_system' , __( 'SP menú administrador' , 'adpnsy' ) );
+			register_nav_menu( 'perfil_admin_system' , __( 'SP menú perfil usuario' , 'adpnsy' ) );
+			register_nav_menu( 'perfil_admin_system__admin' , __( 'SP menú perfil admin' , 'adpnsy' ) );
+			add_action('woocommerce_before_calculate_totals', array($this, 'price_booking'), 99 );
+			add_action('init', array($this,'startSession'));
+			add_action('init', array($this,'custom_role'));
+			add_action('show_user_profile', array($this,'custom_user_profile_fields'));
+			add_action('edit_user_profile', array($this,'custom_user_profile_fields'));
+			add_action('personal_options_update', array($this,'update_extra_profile_fields'));
+			add_action('edit_user_profile_update', array($this,'update_extra_profile_fields'));
+			add_shortcode('tags_camp_cpt', array($this, 'tags_camp_cpt_TOP'));
+			add_shortcode('camp_booking_top', array($this, 'camp_buy_process_TOP'));
+			add_shortcode('listing_camp_single', array($this, 'sh_listing_camp_single_TOP'));
+			add_shortcode('camp_certify_TOP', array($this, 'camp_certify_TOP_cllbck'));
+			add_shortcode('destc_listings_short', array($this, 'destc_listings_short_cllbck'));
+			add_shortcode('list_wishlist_user', array($this, 'list_wishlist_user_cllbck'));
+			add_shortcode('button_wishlist_TOP', array($this, 'button_wishlist_TOP_callback'));
+			add_shortcode('footer_copyright_camp', array($this, 'footer_copyright_campcllbck'));
+			add_shortcode('name_company_camp_pg', array($this, 'name_company_camp_pg_cllbck'));
+			add_shortcode('activities_camps_2', array($this, 'activities_camps_2_cllbck'));
+			add_filter('woocommerce_account_menu_items', array($this, 'mis_mensajes'));
+			add_filter('query_vars', array($this, 'mis_mensajes_query_vars'), 0);
+			add_action('woocommerce_account_mensajes_endpoint', array($this, 'mis_mensajes_content' ));
+			add_filter('woocommerce_my_account_my_orders_actions', array($this, 'agregar_boton_accion_pedido' ), 10, 2 );
+			add_action('woocommerce_order_status_completed', array( $this, 'plazas_sale_booking'));
+			add_action('woocommerce_cart_item_product', array($this, 'cart_item_product'), 99, 3 );
+			add_action('woocommerce_checkout_process', array($this, 'before_checkout_TOP'), 10, 2);
+			add_action('woocommerce_order_status_refunded', array($this, 'refound_booking_TOP'));
+			add_shortcode('retting_coment', array($this, 'retting_coment_function'));
+			add_filter('woocommerce_order_item_get_formatted_meta_data', array($this, 'hide_data_no_client'), 10, 2);
+			add_filter( 'woocommerce_cart_item_remove_link', array($this, 'cart_item_remove_link'), 99, 2 );
+			add_action('user_register', array($this, 'send_verify_activation'), 10, 2);
+			add_action('init', array($this, 'verify_activation_user_cllbck'));
+			add_filter('woocommerce_process_login_errors', array($this, 'validate_to_login_TOP'), 99, 3);
+			add_filter('woocommerce_registration_redirect', array($this, 'desconect_register_TOP'), 10, 1 );
+			add_action('woocommerce_checkout_order_processed', array($this, 'stripe_procesing_TOP'), 10, 3);
+			self::init();
+		}
+
+		public function retting_coment_function(){
+
+			global $wpdb;
+			$jet_reviews = $wpdb->prefix . "jet_reviews";
+			$camp_bookings_top = $wpdb->prefix . 'camp_bookings_top';
+			$user = get_current_user_id();
+			$source_id = get_the_ID();
+			$opiniones = (int)$wpdb->get_var("SELECT COUNT(id) FROM $jet_reviews WHERE author = {$user} AND post_id = {$source_id}");
+			$compras = $wpdb->get_results("SELECT fechas_reserva FROM $camp_bookings_top WHERE id_user = {$user} AND id_camp = {$source_id}");
+			$compras_consumida = 0;
+			$fecha_a = time();
+			if(is_array($compras) && !empty($compras)) foreach($compras as $c){
+				$fechas = explode(" | ", $c->fechas_reserva);
+				$fecha_f = explode("-",$fechas[1]);
+				$fecha_f = strtotime("{$fecha_f[2]}-{$fecha_f[0]}-{$fecha_f[1]}");
+				if ($fecha_a > $fecha_f) {
+					$compras_consumida++;
+				}
+			} 
+			if($opiniones < $compras_consumida){
+				return do_shortcode('[elementor-template id="2572"]');
+			}
+
+			return "";
+			
+		}
+
+		public function agregar_boton_accion_pedido( $actions, $order ) {
+		    $actions['new_mensaje'] = array(
+		        'url'  => '#_' .  $order->get_id(),
+		        'name' => __( 'Enviar mensaje', 'adpnsy' ),
+		    );
+
+		    return $actions;
+		}
+
+		public function mis_mensajes( $tabs ) {
+		    $tabs['mensajes'] = __( 'Mensajes', 'adpnsy' );
+		    return $tabs;
+		}
+
+		public function mis_mensajes_query_vars( $vars ) {
+		    $vars[] = 'mensajes';
+		    return $vars;
+		}
+		  
+		public function mis_mensajes_content() { 
+			global $wpdb;
+			$top_mensajes = $wpdb->prefix . "top_mensajes";
+			$user = get_current_user_id();
+
+			if(isset($_GET['id_m']) && is_numeric($_GET['id_m'])){
+				$id = (int)$_GET['id_m'];
+				$mensaje = $wpdb->get_row("SELECT * FROM $top_mensajes WHERE user= '$user' AND padre = 0 AND id='$id'");
+				if($mensaje){ 
+
+					///nuevo mensaje
+					if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+						if(isset($_POST['msg_text']) && trim($_POST['msg_text'])){
+							$nm = [
+								"message"		=> sanitize_text_field(trim($_POST['msg_text'])),
+								"user"			=> $user,
+								"campamento"	=> $mensaje->campamento,
+								"padre"			=> $mensaje->id
+							];
+							if($wpdb->insert($top_mensajes, $nm) !== false){
+								global $info;
+								$post_id = $mensaje->campamento;
+								$author_id = get_post_field( 'post_author', $post_id );
+								$mail = $author_id ? get_the_author_meta( 'user_email', $author_id ) : get_option("admin_email");
+								$nombre = $author_id ? get_the_author_meta( 'display_name', $author_id ) : 'Administrador';
+								$url = get_option( "siteurl" ) . "/registro-campamentos/?ingresar";
+								$_data = [
+									"nombre" => $nombre,
+									"mensaje" => "Hola $nombre,<br><br>Tienes un nuevo mensaje, para leerlo y responder por favor ingrese a <a target='_blank' href='$url'>este enlaces</a><br><br><br>Si no puedes acceder al enlace prueba copiar y pegar esta URL en tu navegador $url"
+								];
+								$this->mail($mail, __("Nuevo mensaje en TOP Campamentos", 'adpnsy'), "notificacion", $_data, $info);
+								$wpdb->update($top_mensajes, ["estado" => 0], ["id" => $mensaje->id]);
+								$mensaje->estado = 0;
+							}
+						}
+					}
+
+					$mensajes = $wpdb->get_results("SELECT message, fecha, user FROM $top_mensajes WHERE padre = {$mensaje->id} ORDER BY fecha ASC");
+					?>
+					<link rel="stylesheet" id="dashicons-css" href="<?=ADPNSY_URL;?>/css/mensaje_items.css" media="all">
+					<div class="msg-box">
+						<div class="msg-head">
+							<label class="msd-item">Fecha:<span><?=date("d/m/Y", strtotime($mensaje->fecha));?></span></label>
+							<label class="msd-item">Campamento:<span><?=get_the_title($mensaje->campamento) ?? "---";?></span></label>
+							<label class="msd-item">Asunto:<span><?=$mensaje->orden ? __("Información de la orden #",'adpnsy') . $mensaje->orden : __("Información del campamento",'adpnsy'); ?></span></label>
+							<label class="msd-item">Estado:<span><?=$mensaje->estado == 0 ? __('Enviado','adpnsy') : '';?><?=$mensaje->estado == 1 ? __('Leído','adpnsy') : '';?><?=$mensaje->estado == 2 ? __('Respondido','adpnsy') :'';?></span></label>
+						</div>
+						<div class="msg-hist">
+							<p class="msg-text msg-user"><?=$mensaje->message;?><span><?=date("H:i d/m/Y", strtotime($mensaje->fecha));?></span></p>
+							<?php if(count($mensajes)) foreach($mensajes as $m){ ?>
+								<p class="msg-text <?=$m->user == $user ? 'msg-user' : 'msg-campamento' ?>"><?=$m->message?><span><?=date("H:i d/m/Y", strtotime($m->fecha));?></span></p>
+							<?php } ?>
+						</div>
+						<form action="#" method="post" class="msg-n-mensaje">
+							<input type="text" class="msg-n-text" name="msg_text" placeholder="Escriba su mensaje" required />
+							<input type="submit" class="msg-n-send" value="Enviar" />
+						</form>
+					</div>
+					<script type="text/javascript">
+						const element = jQuery(".msg-hist")[0]; 
+						element.scrollTop = element.scrollHeight;
+						if (window.history.replaceState) {
+						    window.history.replaceState(null, null, window.location.href);
+						}
+					</script>
+				<?php }else{
+					echo "<p>".__('Mensaje no encontrado.','adpnsy')."</p>";
+				}
+			}else{
+				$mensajes = $wpdb->get_results("SELECT id, campamento, estado, fecha, orden FROM $top_mensajes WHERE user= '$user' AND padre = 0 ORDER BY fecha DESC"); ?>
+				<link rel="stylesheet" id="dashicons-css" href="<?=ADPNSY_URL;?>/css/mensaje_tabla.css" media="all">
+			    <table class="shop_table shop_table_responsive woocommerce-orders-table">
+					<thead>
+						<tr>
+							<th class="woocommerce-orders-table__header woocommerce-orders-table__header-order-number"><span class="nobr">Fecha</span></th>
+							<th class="woocommerce-orders-table__header woocommerce-orders-table__header-order-number"><span class="nobr">Campamento</span></th>
+							<th class="woocommerce-orders-table__header woocommerce-orders-table__header-order-number"><span class="nobr">Asunto</span></th>
+							<th class="woocommerce-orders-table__header woocommerce-orders-table__header-order-number"><span class="nobr">Estado</span></th>
+							<th class="woocommerce-orders-table__header woocommerce-orders-table__header-order-number"></th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<?php if(count($mensajes)){ foreach($mensajes as $m){ ?>
+							<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-cancelled order">
+								<td class="woocommerce-orders-table__cell"><?=date("d/m/Y", strtotime($m->fecha));?></td>
+								<td class="woocommerce-orders-table__cell"><?=get_the_title($m->campamento);?></td>
+								<td class="woocommerce-orders-table__cell"><?=$m->orden ? __("Información de la orden #",'adpnsy') . $m->orden : __("Información del campamento",'adpnsy'); ?></td>
+								<td class="woocommerce-orders-table__cell">
+									<?=$m->estado == 0 ? __('Enviado','adpnsy') : '';?>
+									<?=$m->estado == 1 ? __('Leído','adpnsy') : '';?>
+									<?=$m->estado == 2 ? __('Respondido','adpnsy') :'';?>
+								</td>
+								<td class="woocommerce-orders-table__cell"><a href="<?=get_option( "siteurl" )?>/mi-cuenta/mensajes/?id_m=<?=$m->id;?>" class="woocommerce-button wp-element-button button view">Ver</a></td>
+							</tr>
+						<?php } }else{ ?>
+							<tr><td colspan="5" class="center"><?=__('Sin mensajes','adpnsy')?></td></tr>
+						<?php } ?>
+					</tbody>
+				</table>
+			<?php }
+		}
+
+		public function menu_register() {
+			add_submenu_page('options-general.php', 'SP Admin', 'SP Admin', 'manage_options', 'panel_admin_system', array($this, 'admin'), 20); 
+		}
+
+		public function notificacion(){
+			$n = '';
+			$c = 0;
+			$t = 0;
+
+			////Mensajes
+			global $wpdb;
+			$top_mensajes = $wpdb->prefix . "top_mensajes";
+			$user = get_current_user_id();
+			$args = array(
+			    'post_type' => 'topcampamentos',
+			    'posts_per_page' => -1,
+			    'author' => $user,
+			    'fields' => 'ids'
+			);
+
+			$post_ids = get_posts( $args );
+
+			if($post_ids){
+				$nuevos = 0;
+				$pendientes = $wpdb->get_results("SELECT campamento, estado, COUNT(id) AS cant 
+					FROM $top_mensajes 
+					WHERE estado < 2 AND padre = 0 AND campamento IN (".implode(",", $post_ids).") 
+					GROUP BY campamento, estado 
+					ORDER BY estado ASC"
+				);
+				if(count($pendientes)) foreach($pendientes as $i => $p){
+					$t += $p->cant;
+					if($p->estado == 0){
+						$c += $p->cant;
+						$n .= "<li tabindex='{$i}'>
+							<a class='black-text' href='".get_site_url()."/mis-mensajes'>
+								<span class='material-icons icon-bg-circle orange'>forum</span> 
+								<p>Tienes {$p->cant} mensaje(s) por leer<br>Campamento: \"" . get_the_title($p->campamento) . "\"</p>
+							</a>
+						</li>";
+					}else{
+						$n .= "<li tabindex='{$i}'>
+							<a class='black-text' href='".get_site_url()."/mis-mensajes'>
+								<span class='material-icons icon-bg-circle gray'>chat_bubble</span> 
+								<p>Tienes {$p->cant} mensaje(s) por responder<br>Campamento: \"" . get_the_title($p->campamento) . "\"</p>
+							</a>
+						</li>";
+					}
+				}
+			}
+
+			return [
+				"n" => ($n == '') ? '<li tabindex="0">Sin notificaciones nuevas</li>' : $n,
+				"c" => ($c > 0) ? '<small class="notification-badge orange accent-3">'.$c.'</small>' : '',
+				"t" => ($t > 0) ? '<span class="new badge">'.$t.'</span>' : '',
+			];
+		}
+
+		public function ajax(){
+			include 'admin_ajax.php';
+		}
+
+		public function install(){
+
+			//Pages
+			$login_ar = array("post_title" => "Login", "post_status" => "publish", "post_type" => "page");
+			$login = wp_insert_post($login_ar);
+			update_post_meta( $login, '_wp_page_template', 'admin_login.php' );
+
+			$dashboard_ar = array("post_title" => "Dashboard", "post_status" => "publish", "post_type" => "page");
+			$dashboard = wp_insert_post($dashboard_ar);
+			update_post_meta( $dashboard, '_wp_page_template', 'admin_dashboard.php' );
+
+			$recovery_ar = array("post_title" => "Recuperar Contraseña", "post_status" => "publish", "post_type" => "page");
+			$recovery = wp_insert_post($recovery_ar);
+			update_post_meta( $recovery, '_wp_page_template', 'admin_recovery.php' );
+
+			$register_ar = array("post_title" => "Registro", "post_status" => "publish", "post_type" => "page");
+			$register = wp_insert_post($register_ar);
+			update_post_meta( $register, '_wp_page_template', 'admin_register.php' );
+
+			$logout_ar = array("post_title" => "Salir", "post_status" => "publish", "post_type" => "page");
+			$logout = wp_insert_post($logout_ar);
+			update_post_meta( $logout, '_wp_page_template', 'admin_logout.php' );
+
+			$perfil_ar = array("post_title" => "Perfil", "post_status" => "publish", "post_type" => "page");
+			$perfil = wp_insert_post($perfil_ar);
+			update_post_meta( $perfil, '_wp_page_template', 'admin_perfil.php' );
+
+			$opciones = json_decode('{
+				"titulo":"SP Admin",
+				"description":"Instación basica de SP Admin",
+				"autor":"Santiago Ponce",
+				"logo":"'.ADPNSY_URL.'\/app-assets\/img\/logo_c.png",
+				"logo_vn":"0",
+				"logo_blanco":"'.ADPNSY_URL.'\/app-assets\/img\/logo_b.png",
+				"logo_blanco_vn":"0",
+				"logo_texto":"Santiago Ponce",
+				"icon_apple":"'.ADPNSY_URL.'\/app-assets\/img\/logo.png",
+				"icon_apple_vn":"0",
+				"favicon":"'.ADPNSY_URL.'\/app-assets\/img\/logo_c.png",
+				"favicon_vn":"0",
+				"bglogin_vn":"'.ADPNSY_URL.'\/app-assets\/img\/login.jpg",
+				"bglogin":"0",
+				"lglogin_vn":"'.ADPNSY_URL.'\/app-assets\/img\/logo.png",
+				"lglogin":"0",
+				"login":"'.$dashboard.'",
+				"Register":"'.$register.'",
+				"Recovery":"'.$recovery.'",
+				"Politicas":"",
+				"botton_fondo":"red",
+				"botton_tono":"darken-1",
+				"botton_color":"white-text",
+				"botton_color_t":"",
+				"demo":"1"
+			}');
+
+			$menu_Admin_id = wp_create_nav_menu("SP Admin menu");
+			$menu_User_id = wp_create_nav_menu("SP Admin menu user");
+			wp_update_nav_menu_item($menu_Admin_id, 0, array(
+		        'menu-item-title' => 'Dashboard',
+			    'menu-item-object-id' => $dashboard,
+			    'menu-item-object' => 'page',
+			    'menu-item-status' => 'publish',
+			    'menu-item-type' => 'post_type',
+			));
+			wp_update_nav_menu_item($menu_User_id, 0, array(
+		        'menu-item-title' => 'Perfil',
+			    'menu-item-object-id' => $perfil,
+			    'menu-item-object' => 'page',
+			    'menu-item-status' => 'publish',
+			    'menu-item-type' => 'post_type',
+			));
+			wp_update_nav_menu_item($menu_User_id, 0, array(
+		        'menu-item-title' => 'Salir',
+			    'menu-item-object-id' => $logout,
+			    'menu-item-object' => 'page',
+			    'menu-item-status' => 'publish',
+			    'menu-item-type' => 'post_type',
+			));
+
+			$locations['admin_system'] = $menu_Admin_id;
+			$locations['perfil_admin_system'] = $menu_User_id;        	
+        	set_theme_mod( 'nav_menu_locations', $locations );
+
+			return $opciones;
+		}
+
+		public function list_event($despues, $antes, $log = false){
+			require_once 'mws/index.php';
+			return __list_event(date(DATE_FORMAT, $despues), date(DATE_FORMAT, $antes), $log);
+		}
+
+		public function startSession() {
+			add_rewrite_endpoint( 'mensajes', EP_ROOT | EP_PAGES );
+		    if(!session_id()) {
+		        session_start();
+		    }
+		}
+
+		public function productos(){
+			if(isset($_GET['delete'])){
+				global $wpdb;
+				$inv_productos = $wpdb->prefix . "inv_productos";
+				$inv_transacciones = $wpdb->prefix . "inv_transacciones";
+				$_id = sanitize_key($_GET['delete']);
+				$_sku = $wpdb->get_var("SELECT sku FROM $inv_productos WHERE id = '$_id';");
+				$_p = $wpdb->get_var("SELECT count(*) FROM $inv_transacciones WHERE sku = '$_sku';");
+				if($_p == 0){
+					if($wpdb->delete($inv_productos, ["id" => $_id]) !== false){
+						$_SESSION['eliminar_producto'] = true;
+					}else{
+						$_SESSION['eliminar_producto'] = false;
+					}
+				}else{
+					$_SESSION['eliminar_producto2'] = true;
+				}
+				echo "<script>location.href='".remove_query_arg('delete')."'</script>";
+				exit;
+				
+			}
+
+			if(isset($_GET['asignar'])){
+				global $wpdb;
+				$inv_productos = $wpdb->prefix . "inv_productos";
+				$inv_operaciones = $wpdb->prefix . "inv_operaciones";
+
+				$_idp = sanitize_key($_GET['asignar']);
+
+				$_pr = $wpdb->get_row("SELECT * FROM $inv_productos WHERE id='$_idp'", ARRAY_A);
+				if($_pr){
+					$_operaciones = $wpdb->get_results("SELECT * FROM $inv_operaciones WHERE user='0' AND sku='$_pr[sku]'", ARRAY_A);
+					$_p = 0;
+					$_e = 0;
+					foreach($_operaciones as $_operacion){
+						if(!$_operacion["devolucion"]){
+							$_operacion["beneficio"] = $_pr["beneficio"];
+							$_operacion["user"] = $_pr["user"];
+							$_operacion["compra"] = $_operacion["cantidad"] * $_pr['pdc_siva'];
+							$_operacion["inversion"] = $_operacion["cantidad"] * $_pr['coste'];
+							$_operacion["beneficio_total"] = $_operacion["base"] + $_operacion["fba"] + $_operacion["amz"] - ( $_operacion["cantidad"] * ($_pr['pdc_siva'] + $_pr['preparacion'] + $_pr['otros'] + $_pr['transporte']));
+							$_operacion["beneficio_user"] = number_format((($_operacion["beneficio_total"]/100)*$_pr['beneficio']),2,".","");
+							$_operacion["margen"] = number_format(($_operacion["beneficio_total"]/($_operacion["base"]+$_operacion["iva"]))* 100,0,".","");
+							$_operacion["margen_user"] = number_format((($_operacion["margen"]/100)*$_pr['beneficio']), 0,".","");
+							$_operacion["roi"] = number_format(($_operacion["beneficio_total"]/$_operacion["inversion"])* 100,0,".","");
+							$_operacion["roi_user"] = number_format((($_operacion["roi"]/100)*$_pr['beneficio']), 0,".","");
+						}else{
+							$_operacion["beneficio"] = $_pr["beneficio"];
+							$_operacion["user"] = $_pr["user"];
+							$_operacion["beneficio_user"] = number_format((($_operacion["beneficio_total"]/100)*$_pr['beneficio']),2,".","");
+						}
+						if($wpdb->replace($inv_operaciones, $_operacion) !== false){
+							$_p++;
+						}else{
+							$_e++;
+						}
+					}
+					if($_p > 0 || $_e > 0){
+						$_SESSION['asignar_producto'] = 1;
+						$_SESSION['asignar_producto_exito'] = $_p;
+						$_SESSION['asignar_producto_error'] = $_e;
+					}else{
+						$_SESSION['asignar_producto'] = 0;
+					}
+				}else{
+					$_SESSION['asignar_producto'] = -1;
+				}
+				echo "<script>location.href='".remove_query_arg('asignar')."'</script>";
+				exit;
+			}
+
+			if(isset($_GET['asignar_todos'])){
+				global $wpdb;
+				$inv_productos = $wpdb->prefix . "inv_productos";
+				$inv_operaciones = $wpdb->prefix . "inv_operaciones";
+
+				$_idp = sanitize_key($_GET['asignar_todos']);
+
+				$_pr = $wpdb->get_row("SELECT * FROM $inv_productos WHERE id='$_idp'", ARRAY_A);
+				if($_pr){
+					$_operaciones = $wpdb->get_results("SELECT * FROM $inv_operaciones WHERE sku='$_pr[sku]'", ARRAY_A);
+					$_p = 0;
+					$_e = 0;
+					foreach($_operaciones as $_operacion){
+						if(!$_operacion["devolucion"]){
+							$_operacion["beneficio"] = $_pr["beneficio"];
+							$_operacion["user"] = $_pr["user"];
+							$_operacion["compra"] = $_operacion["cantidad"] * $_pr['pdc_siva'];
+							$_operacion["inversion"] = $_operacion["cantidad"] * $_pr['coste'];
+							$_operacion["beneficio_total"] = $_operacion["base"] + $_operacion["fba"] + $_operacion["amz"] - ( $_operacion["cantidad"] * ($_pr['pdc_siva'] + $_pr['preparacion'] + $_pr['otros'] + $_pr['transporte']));
+							$_operacion["beneficio_user"] = number_format((($_operacion["beneficio_total"]/100)*$_pr['beneficio']),2,".","");
+							$_operacion["margen"] = number_format(($_operacion["beneficio_total"]/($_operacion["base"]+$_operacion["iva"]))* 100,0,".","");
+							$_operacion["margen_user"] = number_format((($_operacion["margen"]/100)*$_pr['beneficio']), 0,".","");
+							$_operacion["roi"] = number_format(($_operacion["beneficio_total"]/$_operacion["inversion"])* 100,0,".","");
+							$_operacion["roi_user"] = number_format((($_operacion["roi"]/100)*$_pr['beneficio']), 0,".","");
+						}else{
+							$_operacion["beneficio"] = $_pr["beneficio"];
+							$_operacion["user"] = $_pr["user"];
+							$_operacion["beneficio_user"] = number_format((($_operacion["beneficio_total"]/100)*$_pr['beneficio']),2,".","");
+						}
+						if($wpdb->replace($inv_operaciones, $_operacion) !== false){
+							$_p++;
+						}else{
+							$_e++;
+						}
+					}
+					if($_p > 0 || $_e > 0){
+						$_SESSION['asignar_producto'] = 1;
+						$_SESSION['asignar_producto_exito'] = $_p;
+						$_SESSION['asignar_producto_error'] = $_e;
+					}else{
+						$_SESSION['asignar_producto'] = 0;
+					}
+				}else{
+					$_SESSION['asignar_producto'] = -1;
+				}
+				echo "<script>location.href='".remove_query_arg('asignar_todos')."'</script>";
+				exit;
+			}
+
+			if(isset($_SESSION['eliminar_producto'])){
+				if($_SESSION['eliminar_producto'] == true){
+					echo "<div class='notice notice-success is-dismissible'><p>Se elimino el producto</p></div>";
+				}else{
+					echo "<div class='notice notice-error is-dismissible'><p>No se pudo eliminar el producto</p></div>";
+				}
+				unset($_SESSION['eliminar_producto']);
+			}
+
+			if(isset($_SESSION['eliminar_producto2'])){
+				echo "<div class='notice notice-error is-dismissible'><p>Este producto ya posee transacciones no se puede eliminar</p></div>";
+				unset($_SESSION['eliminar_producto2']);
+			}
+
+			if(isset($_SESSION['asignar_producto'])){
+				if($_SESSION['asignar_producto'] == 1){
+					echo "<div class='notice notice-success is-dismissible'><p>Se Asignaron $_SESSION[asignar_producto_exito] operación(es) al usuario con $_SESSION[asignar_producto_error] error(es)</p></div>";
+				}elseif($_SESSION['asignar_producto'] == -1){
+					echo "<div class='notice notice-error is-dismissible'><p>No se encontraron el producto</p></div>";
+				}else{
+					echo "<div class='notice notice-error is-dismissible'><p>No se encontraron operaciones</p></div>";
+				}
+				unset($_SESSION['asignar_producto']);
+				unset($_SESSION['asignar_producto_exito']);
+				unset($_SESSION['asignar_producto_error']);
+			}
+
+			require_once 'inc/tabla.php';
+            $lista = new listar_productos();
+            $lista->prepare_items();
+            ?>
+            	<style type="text/css">.column-ventas, .column-devoluciones, .column-beneficio { width: 100px; }</style>
+            	<div class="wrap">
+	                <div id="icon-users" class="icon32"></div>
+	                <h1 class="wp-heading-inline">Productos</h1>
+	                <form action="" method="GET">
+	                    <p class="search-box">
+	                      <label class="screen-reader-text" for="search-box-id-search-input">Buscar:</label>
+	                      <input type="text" id="search-box-id-search-input" name="s" value="<?= isset($_GET['s']) ? $_GET['s'] : ''; ?>">
+	                      <input type="submit" id="search-submit" class="button" value="Buscar">
+	                    </p>
+	                    <input type="hidden" name="page" value="<?=esc_attr($_REQUEST['page']);?>"/>
+	                </form>
+	                <form id="productos_bulk" method="post">
+	                <?php 
+	                    $page  = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRIPPED );
+	                    $paged = filter_input( INPUT_GET, 'paged', FILTER_SANITIZE_NUMBER_INT );
+	                    printf( '<input type="hidden" name="page" value="%s" />', $page );
+	                    printf( '<input type="hidden" name="paged" value="%d" />', $paged );
+	                    $lista->display();
+	                  ?>
+	                </form>
+              </div>
+            <?php
+		}
+
+		public function producto(){
+			include "inc/producto.php";
+		}
+
+		public function importar(){
+			include "inc/importador.php";
+		}
+
+		public function retiros(){
+
+			if(isset($_GET['pagar'])){
+				global $wpdb;
+				$inv_transacciones = $wpdb->prefix . "inv_transacciones";
+				$id = sanitize_key($_GET['pagar']);
+				$estado = 1;
+
+				if($wpdb->update($inv_transacciones, ["estado" => $estado], ["id" => $id]) !== false ){
+					$_SESSION['exito'] = true;
+				}else{
+					$_SESSION['error'] = true;
+				}
+				
+				echo "<script>location.href='".remove_query_arg('pagar')."'</script>";
+				exit;
+			}
+
+			if(isset($_GET['espera'])){
+				global $wpdb;
+				$inv_transacciones = $wpdb->prefix . "inv_transacciones";
+				$id = sanitize_key($_GET['espera']);
+				$estado = 0;
+
+				if($wpdb->update($inv_transacciones, ["estado" => $estado], ["id" => $id]) !== false ){
+					$_SESSION['exito'] = true;
+				}else{
+					$_SESSION['error'] = true;
+				}
+				
+				echo "<script>location.href='".remove_query_arg('espera')."'</script>";
+				exit;
+			}
+
+			if(isset($_GET['cancelar'])){
+				global $wpdb;
+				$inv_transacciones = $wpdb->prefix . "inv_transacciones";
+				$id = sanitize_key($_GET['cancelar']);
+				$estado = 2;
+
+				if($wpdb->update($inv_transacciones, ["estado" => $estado], ["id" => $id]) !== false ){
+					$_SESSION['exito'] = true;
+				}else{
+					$_SESSION['error'] = true;
+				}
+				
+				echo "<script>location.href='".remove_query_arg('cancelar')."'</script>";
+				exit;
+			}
+
+
+			if(isset($_SESSION['exito'])){
+				echo "<div class='notice notice-success is-dismissible'><p>Se cambio el estado</p></div>";
+				unset($_SESSION['exito']);
+			}
+
+			if(isset($_SESSION['error'])){
+				echo "<div class='notice notice-error is-dismissible'><p>Error al cambiar estado</p></div>";
+				unset($_SESSION['error']);
+			}			
+
+			require_once 'inc/tabla_retiros.php';
+            $lista = new listar_productos();
+            $lista->prepare_items();
+            ?>
+            	<div class="wrap">
+	                <div id="icon-users" class="icon32"></div>
+	                <h1 class="wp-heading-inline">Solicitud de retiro</h1>
+	                <form action="" method="GET">
+	                    <p class="search-box">
+	                      <label class="screen-reader-text" for="search-box-id-search-input">Buscar:</label>
+	                      <input type="text" id="search-box-id-search-input" name="s" value="<?= isset($_GET['s']) ? $_GET['s'] : ''; ?>">
+	                      <input type="submit" id="search-submit" class="button" value="Buscar">
+	                    </p>
+	                    <?php if(isset($_GET['st']) && $_GET['st']) echo "<input type='hidden' name='st' value='$_GET[st]' />"; ?>
+	                    <?php if(isset($_GET['us']) && $_GET['us']) echo "<input type='hidden' name='us' value='$_GET[us]' />"; ?>
+	                    <input type="hidden" name="page" value="<?=esc_attr($_REQUEST['page']);?>"/>
+	                </form>
+	                <?php 
+	                    $page  = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRIPPED );
+	                    $paged = filter_input( INPUT_GET, 'paged', FILTER_SANITIZE_NUMBER_INT );
+	                    printf( '<input type="hidden" name="page" value="%s" />', $page );
+	                    printf( '<input type="hidden" name="paged" value="%d" />', $paged );
+	                    $lista->display();
+	                  ?>
+              </div>
+            <?php
+		}
+
+		public function depositos(){
+
+			if(isset($_GET['delete'])){
+				global $wpdb;
+				$inv_transacciones = $wpdb->prefix . "inv_transacciones";
+				$id = sanitize_key($_GET['delete']);
+				$estado = 1;
+
+				if($wpdb->update($inv_transacciones, ["estado" => $estado], ["id" => $id]) !== false ){
+					$_SESSION['exito'] = true;
+				}else{
+					$_SESSION['error'] = true;
+				}
+				
+				echo "<script>location.href='".remove_query_arg('delete')."'</script>";
+				exit;
+			}
+
+
+			if(isset($_SESSION['exito'])){
+				echo "<div class='notice notice-success is-dismissible'><p>Se elimino el deposito</p></div>";
+				unset($_SESSION['exito']);
+			}
+
+			if(isset($_SESSION['error'])){
+				echo "<div class='notice notice-error is-dismissible'><p>Error al eliminar deposito</p></div>";
+				unset($_SESSION['error']);
+			}			
+
+			require_once 'inc/tabla_depositos.php';
+            $lista = new listar_productos();
+            $lista->prepare_items();
+            ?>
+            	<div class="wrap">
+	                <div id="icon-users" class="icon32"></div>
+	                <h1 class="wp-heading-inline">Solicitud de depositos</h1>
+	                <a href="<?=add_query_arg("new", "true")?>" class="page-title-action">Añadir nuevo</a>
+	                <form action="" method="GET">
+	                    <p class="search-box">
+	                      <label class="screen-reader-text" for="search-box-id-search-input">Buscar:</label>
+	                      <input type="text" id="search-box-id-search-input" name="s" value="<?= isset($_GET['s']) ? $_GET['s'] : ''; ?>">
+	                      <input type="submit" id="search-submit" class="button" value="Buscar">
+	                    </p>
+	                    <?php if(isset($_GET['us']) && $_GET['us']) echo "<input type='hidden' name='us' value='$_GET[us]' />"; ?>
+	                    <input type="hidden" name="page" value="<?=esc_attr($_REQUEST['page']);?>"/>
+	                </form>
+	                <?php 
+	                    $page  = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRIPPED );
+	                    $paged = filter_input( INPUT_GET, 'paged', FILTER_SANITIZE_NUMBER_INT );
+	                    printf( '<input type="hidden" name="page" value="%s" />', $page );
+	                    printf( '<input type="hidden" name="paged" value="%d" />', $paged );
+	                    $lista->display();
+	                  ?>
+              </div>
+            <?php
+		}
+
+		public function custom_role() {
+		    if ( get_option( 'custom_roles_version' ) < 2 ) {
+		        remove_role( 'inversor_confianza' );
+		        remove_role( 'inversor' );
+		        update_option( 'custom_roles_version', 2 );
+		    }
+		}
+
+		public function custom_user_profile_fields( $user ) {
+		?>
+		    <table class="form-table">
+		        <tr>
+		            <th>
+		                <label for="benefico_mm">Beneficio General</label>
+		            </th>
+		            <td>
+		                <input type="number" min="1" step="1" required name="benefico_mm" id="benefico_mm" value="<?php echo esc_attr( get_the_author_meta( 'benefico_mm', $user->ID ) ); ?>" class="regular-text" />
+		            </td>
+		        </tr>
+		    </table>
+		<?php
+		}
+		public function update_extra_profile_fields( $user_id ) {
+		    if ( current_user_can( 'edit_user', $user_id ) ) update_user_meta( $user_id, 'benefico_mm', $_POST['benefico_mm'] );
+		}
+
+		public function tags_camp_cpt_TOP(){
+			global $post;
+			$post_id = $post->ID;
+			$r_data = array();
+			$activity = get_post_meta($post_id, 'actividades', true);
+			$region = get_post_meta($post_id, 'region', true);
+			$r_data['actividades'] = '<a title="Link a los campamentos con la actividad '.$activity.'" href="'.home_url('resultados/?jsf=jet-engine&meta=actividades:'.$activity).'">'.$activity.'</a>';
+			$r_data['region'] = '<a title="Link a los campamentos de la region '.$region.'" href="'.home_url('resultados/?jsf=jet-engine&meta=region:'.$region).'">'.$region.'</a>';
+			$r_data['servicios_plazas'] = get_post_meta($post_id, 'servicios_plazas', true);
+			$r_data['servicios_experiencia'] = get_post_meta($post_id, 'servicios_experiencia', true) . " de experiencia";
+			$r_data['servicios_monitores'] = get_post_meta($post_id, 'servicios_monitores', true);
+			$idioma = get_post_meta($post_id, 'idioma', true);
+			$write_idioma = [];
+			$lang_write = '';
+			foreach($idioma as $k => $v){
+				if($v && $v != false && $v != 'false'){
+					$write_idioma[] = $k;
+				} 
+			}
+			if(count($write_idioma) > 1){
+				$lang_write = '<a title="Link a los campamentos con el idioma inglés y español" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Ingles%2CEspañol').'">Inglés y Español</a>';
+			}else{
+				(in_array('Ingles', $write_idioma)) ? $lang_write = '<a title="Link a los campamentos con el idioma inglés" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Ingles').'">Inglés</a>': $lang_write = '<a title="Link a los campamentos con el idioma español" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Español').'">Español</a>';
+			}
+			$r_data['idioma'] = $lang_write;
+			$container = "<div class='container_tags_fich_camp_pg_TOP_unick'> <div class='content_tags_fich_camp_pg_TOP_unick'>";
+			foreach($r_data as $k => $v) if($v) $container .= "<div class='tag_fich_camp_pg_TOP_unick'>".$v."</div>";
+			$container .= "</div></div>";
+			return $container;
+		}
+
+		// --------- upload imgs top campamentos ----------------
+		public function media_custom_TOPCamps($file_path, $file_name){
+			$file_data = file_get_contents($file_path);
+			$upload = wp_upload_bits($file_name, null, $file_data);
+			if ($upload['error']) {
+				return false;
+			}else {
+				$attachment = array(
+				'guid'           => $upload['url'],
+				'post_mime_type' => $upload['type'],
+				'post_title'     => preg_replace( '/\.[^.]+$/', '', $file_name ),
+				'post_content'   => '',
+				'post_status'    => 'inherit'
+				);
+				$attachment_id = wp_insert_attachment($attachment, $upload['file']);
+				$attachment_data = wp_generate_attachment_metadata($attachment_id, $upload['file']);
+				wp_update_attachment_metadata($attachment_id, $attachment_data);
+				return $attachment_id;
+			}
+
+		}
+		// --------- upload imgs top campamentos ----------------
+
+		// --------- api latitud y longitud callback ----------------
+		public function lt_lg_iframe_TOP($dir){
+			error_log('dirección: '.urlencode($dir));
+			if(!$dir) return false;
+			$url = "https://nominatim.openstreetmap.org/search?format=json&q=" . urlencode($dir);
+			$curl = curl_init();
+			curl_setopt_array($curl, [
+				CURLOPT_RETURNTRANSFER => 1,
+				CURLOPT_URL => $url,
+				CURLOPT_USERAGENT => 'CodexWorld cURL Request',
+				CURLOPT_SSL_VERIFYPEER => false
+			]);
+			$response = curl_exec($curl);
+			curl_close($curl);
+			$resultados = json_decode($response);
+			return $resultados;
+		}
+		// --------- api latitud y longitud callback ----------------
+
+		// ---------- camp shop ----------------
+
+		public function camp_buy_process_TOP(){
+			global $wpdb;
+			global $post;
+			$post_id = $post->ID;
+			$cmsn = get_option('comi_booking');
+			if(!$cmsn) $cmsn = 15;
+			$conatiner_form = '<div class="container_form_booking_fich_TOP" ide="'.$post_id.'">
+									<div class="head_content_form_book">
+										<span>Reserva tu campamento</span>
+									</div>
+									<div class="body_content_form_book">
+										<select class="age_clue_fich" name="edad" id="">
+											<option value="" selected disabled>Edades*</option>
+										</select>
+										<select class="dates_clue_fich" name="fechas" id="" disabled>
+											<option class="base" value="" selected disabled>Fechas*</option>
+										</select>
+										<div class="agroup_cluecamp_fich">
+											<span class="tmp">Temporada: </span>
+											<span class="drc">Duración: </span>
+											<span class="fch">Fechas: </span>
+											<div class="plz"><span>Plazas<p></p></span><span>Plazas disponibles<p></p></span></div>
+										</div>
+										<label for="" class="num_cupes">
+											<span>Cupos a reservar</span>
+											<input class="plaz_num_descont" min="1" type="number" value="1" name="plazas" disabled>
+										</label>
+										<div class="agroup_cluecamp_fich_impo">
+											<span class="notice_book">* Por favor tenga en cuenta que va realizar solo una reserva, es necesario completar el pago posteriormente. Este pago asegura su lugar y garantiza que su reserva esté confirmada. Si tiene alguna pregunta sobre el proceso de pago, no dude en contactarnos.</span>
+											<span class="price_unitary">Precio unitario: <div><p>0</p> &#8364</div></span>
+											<span class="price__total">Total: <div><p>0</p> &#8364 (iva incl.)</div></span>
+											<span class="price__total_percent">Total a pagar: <div><p>0</p> &#8364</div></span>
+										</div>
+										<input type="hidden" class="booking_id_post_top" value="'.$post_id.'">
+										<button class="reserve_booking_in_fich">Reservar</button>
+									</div>
+								</div>';
+			return $conatiner_form;
+		}
+
+		// ---------- camp shop ----------------
+
+		// ---------- Listing single camp ----------------
+
+		public function sh_listing_camp_single_TOP(){
+			global $post;
+			$post_id = $post->ID;
+			$port_media = get_post_meta($post_id, 'portada_camp', true);
+			$port_media = ($port_media) ? $port_media : 0;
+			$activity = get_post_meta($post_id, 'actividades', true);
+			$region = get_post_meta($post_id, 'region', true);
+			$price = json_decode(get_post_meta($post_id, 'cluecamp', true));
+			$lang = get_post_meta($post_id, 'idioma', true);
+			$destc_plan = get_post_meta($post_id, 'certify_by_TOP', true);
+			$destc_plan_30 = get_post_meta($post_id, 'venc_camp_dest_30', true);
+			if($destc_plan){
+				$destc_plan = '<div class="destc_pack_camp">
+									<div class="content_dest_pack_camp">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>
+										<span>Campamento verificado</span>
+									</div>
+								</div>';
+			}else if (time() < $destc_plan_30){
+				$destc_plan = '<div class="destc_pack_camp">
+									<div class="content_dest_pack_camp">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>
+										<span>Destacado</span>
+									</div>
+								</div>';
+			}else{
+				$destc_plan = '';
+			}
+			$langs = array();
+			$lang_write = '';
+			$write_price = array();
+			$write_price_write = '';
+			$current_user = (get_current_user_id()) ? get_current_user_id() : 0;
+			$wish_disable = (!get_current_user_id()) ? 'disable' : 'aviable';
+			foreach($price as $k => $v) if($v->precio) $write_price[] = $v->precio;
+			if(count($write_price) > 1){
+				sort($write_price);
+				$price1 = $write_price[0];
+				$price2 = end($write_price);
+				if($price1 != $price2){
+					$write_price_write = wc_price($price1) . ' - ' . wc_price($price2);
+				}else{
+					$write_price_write = wc_price($write_price[0]);
+				}
+			}else{
+				$write_price_write = wc_price($write_price[0]);
+			}
+			foreach($lang as $k => $v) if(filter_var($v, FILTER_VALIDATE_BOOLEAN)) $langs[] = $k;
+			if(count($langs) > 1){
+				$lang_write = '<span class="language toggle_FILL"><img src="'. ADPNSY_URL .'img/uksp-flag.jpg" alt="Imagen de la bandera de España y Reino Unido"><a title="Link a los campamentos con el idioma inglés y español" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Ingles%2CEspañol').'">Inglés y Español</a></span>';
+			}else{
+				(in_array('Ingles', $langs)) ? $lang_write = '<span class="language toggle_FILL"><img src="'. ADPNSY_URL .'img/uk-flag.jpg" alt="Imagen de la bandera de Reino Unido"><a title="Link a los campamentos con el idioma inglés" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Ingles').'">Inglés</a></span>': $lang_write = '<span class="language toggle_FILL"><img src="'. ADPNSY_URL .'img/sp-flag.jpg" alt="Imagen de la bandera de España"><a title="Link a los campamentos con el idioma español" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Español').'">Español</a></span>';
+			}
+			$wish_log = false;
+			if(is_user_logged_in()){
+				$user_id = get_current_user_id();
+				$wishlist = get_user_meta($user_id, 'wishlist_user_TOP', true);
+				if($wishlist){
+					if(is_serialized($wishlist)) unserialize($wishlist);
+					if(in_array($post_id, $wishlist)) $wish_log = true;
+				}
+			}
+			$isw = ($wish_log) ? 'add': 'nadd';
+
+			$wish_added = ($wish_log) ? '': 'disabled';
+			$wish_empty = (!$wish_log) ? '': 'disabled';
+
+			$port_media = ($port_media) ? ((wp_get_attachment_url($port_media)) ? wp_get_attachment_url($port_media) : home_url('/wp-content/uploads/2023/05/Imagen-banner-top-2.jpg')) : home_url('/wp-content/uploads/2023/05/Imagen-banner-top-2.jpg');
+			$container = '<div class="container_listing_camp">
+								<div class="head_img_listing">	
+									<a href="'.get_permalink($post_id).'" title="Link al campamento '.get_the_title($post_id).'">
+										<img src="'.$port_media.'" alt="Imagen de portada del campamento">
+									</a>
+									'.$destc_plan.'
+									<span usr="'.$current_user.'" class="wishlist_icon_top_camp destc_sll '.$wish_disable.'" wis="'.$post_id.'" isw="'.$isw.'">
+										<div class="heart_added '.$wish_added.'">
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>
+										</div>
+										<div class="heart_empty '.$wish_empty.'" >
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --><path d="M458.4 64.3C400.6 15.7 311.3 23 256 79.3 200.7 23 111.4 15.6 53.6 64.3-21.6 127.6-10.6 230.8 43 285.5l175.4 178.7c10 10.2 23.4 15.9 37.6 15.9 14.3 0 27.6-5.6 37.6-15.8L469 285.6c53.5-54.7 64.7-157.9-10.6-221.3zm-23.6 187.5L259.4 430.5c-2.4 2.4-4.4 2.4-6.8 0L77.2 251.8c-36.5-37.2-43.9-107.6 7.3-150.7 38.9-32.7 98.9-27.8 136.5 10.5l35 35.7 35-35.7c37.8-38.5 97.8-43.2 136.5-10.6 51.1 43.1 43.5 113.9 7.3 150.8z"/></svg>
+										</div>	
+									</span>
+									<span class="activity toggle_FILL"><a title="Link a los campamentos con la actividad '.$activity.'" href="'.home_url('resultados/?jsf=jet-engine&meta=actividades:'.$activity).'">'.$activity.'</a></span>
+								</div>
+								<div class="body_data_listing_camp">
+									<div class="f1-row">
+										<span class="title"><a href="'.get_permalink($post_id).'" title="Enlace al campamento '.get_the_title($post_id).'">'.get_the_title($post_id).'</a></span>
+									</div>
+									<div class="f2-row">
+										<span class="prefix_ub">Región: </span>
+										<span class="ubication toggle_FILL"><a title="Link a los campamentos de la region '.$region.'" href="'.home_url('resultados/?jsf=jet-engine&meta=region:'.$region).'">'.$region.'</a></span>
+									</div>
+									<div class="f3-row">
+										'.$lang_write.'
+									</div>
+									<div class="f4-row">
+										<span class="price_prefix">Precio:</span>
+										<span class="price">'.$write_price_write.'</span>
+									</div>
+									<a class="view_camp" href="'.get_permalink($post_id).'" title="Link al campamento '.get_the_title($post_id).'">Ver ficha</a>
+								</div>
+							</div>';
+			return $container;
+		}
+
+		// ---------- Listing single camp ----------------
+
+		public function date_format_cluecamp($date, $type = 1){
+			$fc = explode('-', $date);
+			if($type == 1) return $fc[1].'-'.$fc[0].'-'.$fc[2];
+			return $fc[2].'-'.$fc[0].'-'.$fc[1];
+		}
+
+		public function price_booking($cart_object) {  
+			$cmsn = get_option('comi_booking');
+			if(!$cmsn) $cmsn = 15;
+	        foreach ( $cart_object->cart_contents as $item ) {
+				if($item['product_id'] == 236){
+					$to_price = $item['variation']['precio'];
+					$the_price = ($to_price / 100) * $cmsn;
+					$item['data']->set_price($the_price);
+				}
+	        } 
+		}
+
+		public function plazas_sale_booking($order_id){
+			$order = wc_get_order($order_id);
+			$order_items = $order->get_items();
+			$order_total = $order->get_total();
+			$user_id = $order->get_user_id();
+			$process = get_post_meta($order_id, 'topcamp_process', true);
+			if(!empty($order_items) && !$process){
+				foreach($order_items as $key => $it){
+					$the_pid = $it->get_product_id();
+					if($the_pid == 236){
+						$camp_id = $it->get_meta('campamento');
+						$clue_id = $it->get_meta('reserva');
+						$quantity = $it->get_quantity();
+						$fechas_r = ($it->get_meta('fechas_r')) ? $it->get_meta('fechas_r') : '';
+						$edades_r = ($it->get_meta('edades_r')) ? $it->get_meta('fechas_r') : '';
+						$ttl = ($it->get_meta('title_camp')) ? ' '.$it->get_meta('title_camp').'.' : '.';
+						if($camp_id && $clue_id && $quantity){
+							$clue_data_dis = get_post_meta($camp_id, 'plazas_disp', true);
+							if(is_array($clue_data_dis) && isset($clue_data_dis[$clue_id])){
+								global $wpdb;
+								$camp_bookings_top = $wpdb->prefix . 'camp_bookings_top';
+								$author_id = (get_post_field('post_author', $camp_id)) ? get_post_field('post_author', $camp_id): 0;
+								$current_date = date('Y-m-d');
+								$cmsn = get_option('comi_booking');
+								if(!$cmsn) $cmsn = 15;
+								$data_booking_table = array(
+									'plazas'			=>  $quantity,
+									'id_orden'			=>  $order_id,
+									'id_user'			=>  $user_id,
+									'id_gest_camp'		=>  $author_id,
+									'id_camp'			=>  $camp_id,
+									'id_cluecamp'		=>  $clue_id,
+									'precio'			=>  $order_total,
+									'fecha'				=>  $current_date,
+									'fullname'			=>  get_post_meta($order_id, '_billing_first_name', true) . ' ' . get_post_meta($order_id, '_billing_last_name', true),
+									'correo'			=>  get_post_meta($order_id, '_billing_email', true),
+									'telefono'			=>  get_post_meta($order_id, '_billing_phone', true),
+									'fechas_reserva'	=>  $fechas_r,
+									'comision'			=>  $cmsn,
+								);
+								if($wpdb->insert($camp_bookings_top, $data_booking_table)){
+									$clue_data_dis[$clue_id] += $quantity;
+									if(!update_post_meta($camp_id, 'plazas_disp', $clue_data_dis)){
+										$mensaje_admin = '<h1>¡Hola Agata!</h1>
+											<p>
+												Quería hacerte saber que ha ocurrido un error en el proceso de la reserva #'.$order_id.' con el campamento '.get_the_title($camp_id).' . Lamentablemente, no podemos descontar las plazas correctamente.
+												<br>
+												Debes comunicarte con el equipo de la aplicación para que puedan ayudarte a resolver este problema lo antes posible.
+											</p>
+										';
+										$data_admin = [
+											"nombre"	=> 'Agata',
+											"mensaje"	=> $mensaje_admin,
+										];
+										$this->mail('info@topcampamentos.com', "Error en la reservación", "reservacion-admin", $data_admin);
+										$order->add_order_note('Ha ocurrido un error al intentar descontar las plazas del campamento'.$ttl);
+										$order->update_status('on-hold', 'Error al descontar las plazas.');
+									}else{
+										$data_campists_for = $order->get_customer_note();
+										$data_notes = ($data_campists_for) ? 'Aquí tienes la información de los campistas que asistirán a tu campamento: '.$data_campists_for.'<br><br>' : '';
+										$mensaje_user = get_post_meta($camp_id, 'mail_message', true);
+										$correo = get_post_meta($order_id, '_billing_email', true);
+										$name_user = get_post_meta($order_id, '_billing_first_name', true) . ' ' . get_post_meta($order_id, '_billing_last_name', true);
+										$mensaje_admin = '<h1>¡Hola Agata!</h1>
+											<p>
+												Te escribimos para informarte de que se ha hecho una nueva reserva en TOP Campamentos. ¡El campamento que se ha reservado es '.get_the_title($camp_id).'!<br><br>
+												Nos complace informarte que el correo electrónico de confirmación ha sido enviado correctamente al cliente y a la empresa del campamento.<br><br>
+												Por favor, revisa la reserva lo antes posible y asegúrate de que todo está correcto. Si tienes alguna pregunta o necesitas más información, no dudes en ponerte en contacto con el soporte.
+											</p>
+											<br>
+											<a href="'.home_url().'">Ir a TOP Campamentos</a>
+										';
+										$mensaje_camp = '<h1>¡Enhorabuena!</h1>
+											<p>
+												¡Tenemos noticias emocionantes que compartir contigo! Acabas de recibir una nueva reserva en tu campamento en TOP Campamentos. El campamento reservado es '.get_the_title($camp_id).'.<br><br>
+												Nos complace informarte que el correo electrónico de contacto para el cliente se envió correctamente. ¡Así que todo está listo para que tus huéspedes disfruten de su estancia en tu campamento!<br><br>
+												'.$data_notes.'
+												Para revisar los detalles de la reserva, puedes acceder a tu panel de administración en TOP Campamentos. Ahí encontrarás toda la información necesaria.<br><br>
+												Si tienes alguna pregunta o necesitas más información, no dudes en ponerte en contacto con nosotros. ¡Estamos aquí para ayudarte en lo que necesites!<br><br><br>
+												¡Gracias por ser parte de TOP Campamentos!<br>
+											</p>
+											<br>
+											<a href="'.home_url().'">Ir a TOP Campamentos</a>
+										';
+										$mensaje_base = '<h2>¡Hola {{nombre_cliente}}!</h2>
+											<p>
+											¡Bienvenido(a) a nuestro campamento! Gracias por su reserva y estamos emocionados de tenerles como nuestros huéspedes.
+											<br>
+											<br>
+											Solo queremos recordarle que aún queda por pagar el resto del campamento y le estaremos contactando pronto para organizar los detalles de su reserva y asegurarnos de que todo esté listo. Si tiene alguna pregunta o inquietud, puede hacérnoslo saber siguiendo este enlace: <a href="{{campamento_enlace}}">Tengo una duda</a>.
+											<br>
+											<br>
+											Por lo pronto necesitamos ciertos datos del o los campistas tales como: 
+											<br>
+											</p>
+											<ol>
+												<li style="color: #333;">Alergias o especifiaciones alimentarias</li>
+												<li style="color: #333;">¿Toma alguna medicación? (En caso afirmativo detallar en ficha médica)</li>
+												<li style="color: #333;">¿Padece algún tipo de discapacidad?</li>
+											</ol>
+											<br>
+											<p>
+											Ficha médica Ej: Enfermedades importantes, padece algún tipo de discapacidad, 
+											ataques epilépticos, ...). 
+											<br>
+											De igual manera debe brindarnos ciertos comentarios o detalles a tener en cuenta Ej: Sabe nadar, ha estado antes en campamentos, tiene algún miedo específico, ... 
+											<br>
+											Esta información debe hacérnosla al correo electrónico con el que nos estaremos comunicando próximamente.
+											<br>
+											<br>
+											Esperamos que disfruten de todas las actividades y experiencias que ofrecemos en nuestro campamento. ¡Gracias por elegirnos como su destino de campamento!
+											</p>';
+										$variables = [
+											"{{nombre_campamento}}" 		=> get_the_title($camp_id),
+											"{{nombre_completo_cliente}}"	=> get_post_meta($order_id, '_billing_first_name', true) . ' ' . get_post_meta($order_id, '_billing_last_name', true),
+											"{{nombre_cliente}}" 			=> get_post_meta($order_id, '_billing_first_name', true),
+											"{{apellido_cliente}}" 			=> get_post_meta($order_id, '_billing_last_name', true),
+											"{{fechas_contratadas}}" 		=> $fechas_r,
+											"{{plazas_contratadas}}" 		=> $quantity,
+											"{{cantidad_deuda}}" 			=> ($order_total/15)*85,
+											"{{telefono_cliente}}" 			=> get_post_meta($order_id, '_billing_phone', true),
+											"{{campamento_edades}}" 		=> $edades_r,
+											"{{campamento_enlace}}" 		=> get_permalink($camp_id),
+											"{{cuenta_usuario}}" 			=> home_url('/mi-cuenta/'),
+										];
+										$mensaje_def = ($mensaje_user) ? $mensaje_user: $mensaje_base;
+										foreach($variables as $vr => $vl) $mensaje_def = str_replace($vr, $vl, $mensaje_def);
+										$data = [
+											"nombre" 	=> $name_user,
+											"mensaje"	=> $mensaje_def,
+										];
+										$data_admin = [
+											"nombre"	=> 'Agata',
+											"mensaje"	=> $mensaje_admin,
+										];
+										if($author_id){
+											$gest_mail = get_the_author_meta('user_email', $author_id);
+											if($gest_mail){
+												$data_camp = [
+													"nombre"	=> get_userdata($author_id)->display_name,
+													"mensaje"	=> $mensaje_camp,
+												];
+												$send_mail_camp = $this->mail($gest_mail, "¡Nueva reserva en TOP Campamentos!", "reservacion-camp", $data_camp);
+												if(!$send_mail_camp) $order->add_order_note('Ha ocurrido un error con el envío del correo de aviso al gestor de campamento.');
+											}else{
+												$order->add_order_note('Ha ocurrido un error al intentar enviar el mensaje de aviso al gestor de este campamento.');
+											}
+										}else{
+											$order->add_order_note('Ha ocurrido un error al intentar enviar el mensaje de aviso al gestor de este campamento.');
+										}
+										$send_mail_user = $this->mail($correo, "Nuevo mensaje de TOP Campamentos", "reservacion", $data);
+										$this->mail('info@topcampamentos.com', "¡Nueva reserva en TOP Campamentos!", "reservacion-admin", $data_admin);
+										if(!$send_mail_user) $order->add_order_note('Ha ocurrido un error con el envío del correo de contacto entre el campamento '.get_the_title($camp_id).' y el usuario '.$name_user.'.');
+										update_post_meta($order_id, 'topcamp_process', true);
+									}
+								}else{
+									$order->add_order_note('Ha ocurrido un error al intentar guardar la orden al campamento'.$ttl);
+									$order->update_status('on-hold', 'Error al guardar la orden al campamento.');
+								}
+							}else{
+								$mensaje_admin = '<h1>¡Hola Agata!</h1>
+											<p>
+												Quería hacerte saber que ha ocurrido un error al obtener la información necesaria para seguir con el proceso de reservación con el campamento '.get_the_title($camp_id).' en la reserva #'.$order_id.'. Lamentablemente, no podemos descontar las plazas debido a que la información no se obtuvo correctamente.
+												<br>
+												Debes comunicarte con el equipo de la aplicación para que puedan ayudarte a resolver este problema lo antes posible.
+											</p>
+								';
+								$data_admin = [
+									"nombre"	=> 'Agata',
+									"mensaje"	=> $mensaje_admin,
+								];
+								$this->mail('info@topcampamentos.com', "Error en la reservación", "reservacion-admin", $data_admin);
+								$order->add_order_note('Ha ocurrido un error al obtener la información para descontar las plazas del campamento'.$ttl);
+							}
+						}else{
+							$mensaje_admin = '<h1>¡Hola Agata!</h1>
+											<p>
+												Quería hacerte saber que ha ocurrido un error al obtener la información necesaria para seguir con el proceso de reservación con el campamento '.get_the_title($camp_id).' en la reserva #'.$order_id.'. Lamentablemente, no podemos descontar las plazas debido a que la información no se obtuvo correctamente.
+												<br>
+												Debes comunicarte con el equipo de la aplicación para que puedan ayudarte a resolver este problema lo antes posible.
+											</p>
+							';
+							$data_admin = [
+								"nombre"	=> 'Agata',
+								"mensaje"	=> $mensaje_admin,
+							];
+							$this->mail('info@topcampamentos.com', "Error en la reservación", "reservacion-admin", $data_admin);
+							$order->add_order_note('Ha ocurrido un error al obtener la información para descontar las plazas del campamento'.$ttl);
+						}
+						$it->set_name(get_the_title($camp_id));
+					}else if($the_pid == 2693){
+						$camp_id = $it->get_meta('camp');
+						$add_certify = update_post_meta($camp_id, 'certify_by_TOP', true);
+						if(!$add_certify){
+							$order->add_order_note('Ha ocurrido un error al asignarle la certificación al campamento '.get_the_title($camp_id).', por favor comuniquese con el soporte de la aplicación para solucionar este problema.');
+						}
+					}else if($the_pid == 2695){
+						$camp_id = $it->get_meta('camp');
+						$the_meta_destc_visiblt = get_post_meta($the_pid, 'activity_desc_plan', true);
+						if($the_meta_destc_visiblt){
+							if(is_serialized($the_meta_destc_visiblt)) unserialize($the_meta_destc_visiblt);
+							$the_meta_destc_visiblt[] = $camp_id;
+						}else{
+							$the_meta_destc_visiblt = array($camp_id);
+						}
+						if(!update_post_meta($the_pid, 'activity_desc_plan', $the_meta_destc_visiblt)){
+							$order->add_order_note('Ha ocurrido un error al asignarle el plan de visibilidad destacada al campamento '.get_the_title($camp_id).', por favor comuniquese con el soporte de la aplicación para solucionar este problema.');
+						}else{
+							$to_date = strtotime('+30 days');	
+							if(!update_post_meta($camp_id, 'venc_camp_dest_30', $to_date)){
+								$order->add_order_note('Ha ocurrido un error al asignarle el plan de visibilidad destacada al campamento '.get_the_title($camp_id).', por favor comuniquese con el soporte de la aplicación para solucionar este problema.');
+							}
+						}
+					}
+					
+				}
+			}
+			$order->save();
+		}
+
+		public function cart_item_product($cart_item_product, $cart_item, $cart_item_key){
+        	if(isset($cart_item["variation"]["title_camp"])) $cart_item_product->set_name($cart_item["variation"]["title_camp"]);
+        	return $cart_item_product; 
+        }
+
+		public function before_checkout_TOP(){
+			$order_items = WC()->cart->get_cart();
+			if(!empty($order_items)){
+				foreach($order_items as $key => $it){
+					$camp_id = $it['variation']['campamento'];
+					if($camp_id == 236){
+						$clue_id = $it['variation']['reserva'];
+						$quantity = $it['quantity'];
+						$disp = get_post_meta($camp_id, 'plazas_disp', true);
+						$clue_data = json_decode(get_post_meta($camp_id, 'cluecamp', true));
+						if(($clue_data->{$clue_id}->plazas_num - $disp[$clue_id]) < $quantity){
+							wc_add_notice( 'Lo sentimos, no hay suficientes plazas disponibles para este campamento"', 'error' );
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		public function refound_booking_TOP($order_id){
+			$order = wc_get_order($order_id);
+			$order_items = $order->get_items();
+			if(!empty($order_items)){
+				foreach($order_items as $key => $it){
+					$camp_id = $it->get_meta('campamento');
+					$clue_id = $it->get_meta('reserva');
+					$quantity = $it->get_quantity();
+					$clue_data_dis = get_post_meta($camp_id, 'plazas_disp', true);
+					if($camp_id && $clue_id && $quantity){
+						global $wpdb;
+						$camp_bookings_top = $wpdb->prefix . 'camp_bookings_top';
+						if(is_array($clue_data_dis) && isset($clue_data_dis[$clue_id])) $clue_data_dis[$clue_id] -= $quantity;
+						if(!update_post_meta($camp_id, 'plazas_disp', $clue_data_dis)){
+							$order->update_status('completed');
+							$order->add_order_note("Lamentablemente, no se pudieron restaurar las plazas después del reembolso. Por favor, ponte en contacto con soporte técnico para obtener ayuda adicional con este problema.");
+							$order->save();
+							return;
+						}else{
+							if(!$wpdb->delete($camp_bookings_top, array( 'id_orden' => $order_id))){
+								$order->update_status('completed');
+								$order->add_order_note("No se pudo eliminar el registro de la base de datos. Por favor, ponte en contacto con soporte técnico");
+							}else{
+								if(!delete_post_meta($order_id, 'topcamp_process')){
+									$order->update_status('completed');
+									$order->add_order_note('Lo siento, no se pudo eliminar el control de la orden para permitir su procesamiento en el futuro. Por favor, intenta nuevamente más tarde o ponte en contacto con el soporte técnico para obtener ayuda adicional.');
+								}		
+							}
+						}
+					}else{
+						$order->update_status('completed');
+						$order->add_order_note("Lo siento, no se pudo obtener la información necesaria para procesar el reembolso en este momento. Por favor, intenta nuevamente más tarde o ponte en contacto con el soporte técnico para obtener ayuda adicional.");
+					}
+				}
+			}
+			$order->save();
+		}
+
+		public function camp_certify_TOP_cllbck(){
+			global $post;
+			$camp_id = $post->ID;
+			if(get_post_meta($camp_id, 'certify_by_TOP', true)){
+				$return = '<div class="camp_certify_container">
+								<div class="camp_certify_content">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>
+									<span>Campamento verificado</span>
+								</div>
+							</div>';
+				return $return;
+			}
+		}
+
+		public function destc_listings_short_cllbck(){
+			$args = array(
+				'post_type' => 'topcampamentos',
+				'post_status' => 'publish',
+				'orderby' => 'rand',
+				'posts_per_page' => 4,
+				'fields' => 'ids',
+				'meta_query' => array(
+					array(
+						'key' => 'venc_camp_dest_30',
+						'compare' => 'EXISTS',
+					),
+				),
+			);
+			$return = '';
+			$the_camps = get_posts($args);
+			if(!empty($the_camps)){
+				$return = '<div class="container_father_destc_30_act">
+				<div class="content_father_destc_30_act">';
+				foreach($the_camps as $camp){
+					$logged = '';
+					$wish_log = false;
+					if(!is_user_logged_in()){
+						$logged = 'disabled';
+					}else{
+						$user_id = get_current_user_id();
+						$wish_user = get_user_meta($user_id, 'wishlist_user_TOP', true);
+						if($wish_user){
+							if(is_serialized($wish_user)) unserialize($wish_user);
+							if(in_array($camp, $wish_user)){
+								$wish_log = true;
+							}
+						}
+					}
+					$isw = ($wish_log) ? 'add': 'nadd';
+					$wish_added = ($wish_log) ? '': 'disabled';
+					$wish_empty = (!$wish_log) ? '': 'disabled';
+					$activity = get_post_meta($camp, 'actividades', true);
+					$region = get_post_meta($camp, 'region', true);
+					$lang = get_post_meta($camp, 'idioma', true);
+					$price = get_post_meta($camp, 'precio', true);
+					$title = get_the_title($camp);
+					$photo = get_post_meta($camp, 'portada_camp', true);
+					$is_photo = 'true';
+					if($photo){
+						$is_photo = 'false';
+						$photo = (wp_get_attachment_url($photo)) ? wp_get_attachment_url($photo) : home_url('/wp-content/uploads/2023/05/TOPcampamentos-logotipo-combinado.png');
+					}else{	
+						$photo = home_url('/wp-content/uploads/2023/05/TOPcampamentos-logotipo-combinado.png'); 
+					}
+					$langs = [];
+					$lang_write = '';
+					foreach($lang as $k => $v){
+						if($v && $v != false && $v != 'false'){
+							$langs[] = $k; 
+						}
+					}
+					if(count($langs) > 1){
+						$lang_write = '<span class="langs_destc"><img src="'. ADPNSY_URL .'img/uksp-flag.jpg" alt="Imagen de la bandera de España y Reino Unido"><a title="Link a los campamentos con el idioma inglés y español" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Ingles%2CEspañol').'">Inglés y Español</a></span>';
+					}else{
+						(in_array('Ingles', $langs)) ? $lang_write = '<span class="langs_destc"><img src="'. ADPNSY_URL .'img/uk-flag.jpg" alt="Imagen de la bandera de Reino Unido"><a title="Link a los campamentos con el idioma inglés" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Ingles').'">Inglés</a></span>': $lang_write = '<span class="langs_destc"><img src="'. ADPNSY_URL .'img/sp-flag.jpg" alt="Imagen de la bandera de España"><a title="Link a los campamentos con el idioma español" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Español').'">Español</a></span>';
+					}
+					$return .= '<div class="back_camp_img '.$is_photo.'" style="background-image: url('.$photo.')">
+									<div class="card_destc_activy">
+										<span class="destc_sll">
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>
+											Destacado
+										</span>
+										<div class="wishlist_destc '.$logged.'" wis="'.$camp.'" isw="'.$isw.'">
+											<div class="heart_added '.$wish_added.'">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>
+											</div>
+											<div class="heart_empty '.$wish_empty.'">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --><path d="M458.4 64.3C400.6 15.7 311.3 23 256 79.3 200.7 23 111.4 15.6 53.6 64.3-21.6 127.6-10.6 230.8 43 285.5l175.4 178.7c10 10.2 23.4 15.9 37.6 15.9 14.3 0 27.6-5.6 37.6-15.8L469 285.6c53.5-54.7 64.7-157.9-10.6-221.3zm-23.6 187.5L259.4 430.5c-2.4 2.4-4.4 2.4-6.8 0L77.2 251.8c-36.5-37.2-43.9-107.6 7.3-150.7 38.9-32.7 98.9-27.8 136.5 10.5l35 35.7 35-35.7c37.8-38.5 97.8-43.2 136.5-10.6 51.1 43.1 43.5 113.9 7.3 150.8z"/></svg>
+											</div>
+										</div>
+										<div class="content_cartd_destc_activy">
+											<div class="head_card">
+												<span class="activity"><a title="Link a los campamentos con la actividad '.$activity.'" href="'.home_url('resultados/?jsf=jet-engine&meta=actividades:'.$activity).'">'.$activity.'</a></span> 
+											</div>	
+											<div class="ctitle">
+												<h2 class="title_camp"><a href="'.get_permalink($camp).'" title="Enlace al campamento '.$title.'">'.$title.'</a></h2>
+											</div>
+											<div class="cubi">
+												<span class="ubication"><a title="Link a los campamentos de la region '.$region.'" href="'.home_url('resultados/?jsf=jet-engine&meta=region:'.$region).'">'.$region.'</a></span>
+											</div>
+											<div class="clang">
+												'.$lang_write.'
+											</div>
+											<div class="cprice">
+												<h4>'.wc_price($price).'</h4>
+											</div>
+											<div class="cbtn">
+												<a href="'.get_permalink($camp).'" title="Link al campamento '.$title.'">Ver ficha</a>
+											</div>
+										</div>
+									</div>
+								</div>';
+				}
+				$return .= '	</div>
+							</div>';
+			}else{
+				$return = '<div class="empty_camps_destc_30"><h4>Sin campamentos destacados</h4></div>';
+			}
+			return $return;
+		}
+
+		public function list_wishlist_user_cllbck(){
+			$user_id = get_current_user_id();
+			$meta = get_user_meta($user_id, 'wishlist_user_TOP', true);
+			$return = '';
+			if($meta){
+				$return = '<div class="container_camps_wishlist">
+							<div class="content_wishlist">';
+				if(is_serialized($meta)) unserialize($meta);
+				foreach($meta as $post_id){
+					if(get_post_status($post_id) !== 'publish') continue;
+					$port_media = get_post_meta($post_id, 'portada_camp', true);
+					$activity = get_post_meta($post_id, 'actividades', true);
+					$region = get_post_meta($post_id, 'region', true);
+					$price = json_decode(get_post_meta($post_id, 'cluecamp', true));
+					$destc_plan = get_post_meta($post_id, 'certify_by_TOP', true);
+					$destc_plan_30 = get_post_meta($post_id, 'venc_camp_dest_30', true);
+					if($destc_plan){
+						$destc_plan = '<div class="destc_pack_camp">
+											<div class="content_dest_pack_camp">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>
+												<span>Campamento verificado</span>
+											</div>
+										</div>';
+					}else if (time() < $destc_plan_30){
+						$destc_plan = '<div class="destc_pack_camp">
+											<div class="content_dest_pack_camp">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>
+												<span>Destacado</span>
+											</div>
+										</div>';
+					}else{
+						$destc_plan = '';
+					}
+					$lang = get_post_meta($post_id, 'idioma', true);
+					$langs = array();
+					$lang_write = '';
+					$write_price = array();
+					$write_price_write = '';
+					foreach($price as $k => $v) if($v->precio) $write_price[] = $v->precio;
+					if(count($write_price) > 1){
+						sort($write_price);
+						$write_price_write = wc_price($write_price[0]) . ' - ' . wc_price(end($write_price));
+					}else{
+						$write_price_write = wc_price($write_price[0]);
+					}
+					foreach($lang as $k => $v) if(filter_var($v, FILTER_VALIDATE_BOOLEAN)) $langs[] = $k;
+					if(count($langs) > 1){
+						$lang_write = '<span class="language toggle_FILL"><img src="'. ADPNSY_URL .'img/uksp-flag.jpg" alt="Imagen de la bandera de España y Reino Unido"><a title="Link a los campamentos con el idioma inglés y español" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Ingles%2CEspañol').'">Inglés y Español</a></span>';
+					}else{
+						(in_array('Ingles', $langs)) ? $lang_write = '<span class="language toggle_FILL"><img src="'. ADPNSY_URL .'img/uk-flag.jpg" alt="Imagen de la bandera de Reino Unido"><a title="Link a los campamentos con el idioma inglés" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Ingles').'">Inglés</a></span>': $lang_write = '<span class="language toggle_FILL"><img src="'. ADPNSY_URL .'img/sp-flag.jpg" alt="Imagen de la bandera de España"><a title="Link a los campamentos con el idioma español" href="'.home_url('resultados/?jsf=jet-engine&meta=idioma!is_custom_checkbox:Español').'">Español</a></span>';
+					}
+					$port_media = ($port_media) ? ((wp_get_attachment_url($port_media)) ? wp_get_attachment_url($port_media) : home_url('/wp-content/uploads/2023/05/Imagen-banner-top-2.jpg')) : home_url('/wp-content/uploads/2023/05/Imagen-banner-top-2.jpg');
+					$return .= '<div class="container_listing_camp" cmpdlt="'.$post_id.'">
+										<div class="head_img_listing">	
+											<a href="'.get_permalink($post_id).'" title="Link al campamento '.get_the_title($post_id).'">
+												<img src="'.$port_media.'" alt="Imagen de portada del campamento">
+											</a>
+											'.$destc_plan.'
+											<span class="campdlt_TOP" tdlt="'.$post_id.'">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --><path d="M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"/></svg>
+											</span>
+											<span class="activity toggle_FILL"><a title="Link a los campamentos con la actividad '.$activity.'" href="'.home_url('resultados/?jsf=jet-engine&meta=actividades:'.$activity).'">'.$activity.'</a></span>
+										</div>
+										<div class="body_data_listing_camp">
+											<div class="f1-row">
+												<span class="title"><a href="'.get_permalink($post_id).'" title="Enlace al campamento '.get_the_title($post_id).'">'.get_the_title($post_id).'</a></span>
+											</div>
+											<div class="f2-row">
+												<span class="prefix_ub">Región: </span>
+												<span class="ubication toggle_FILL"><a title="Link a los campamentos de la region '.$region.'" href="'.home_url('resultados/?jsf=jet-engine&meta=region:'.$region).'">'.$region.'</a></span>
+											</div>
+											<div class="f3-row">
+												'.$lang_write.'
+											</div>
+											<div class="f4-row">
+												<span class="price_prefix">Precio:</span>
+												<span class="price">'.$write_price_write.'</span>
+											</div>
+											<a class="view_camp" href="'.get_permalink($post_id).'" title="Link al campamento '.get_the_title($post_id).'">Ver ficha</a>
+										</div>
+									</div>';
+				}
+				$return .= '	</div>
+						</div>';
+			}else{
+				$return = '<div class="empty_wishlist">
+								<h2>No hay campamentos en tu lista de deseos</h2>
+							</div>';
+			}
+			return $return;
+			
+		}
+
+		public function button_wishlist_TOP_callback(){
+			$return = '';
+			$diferent = (!is_front_page()) ? 'notf': '';
+			if(is_user_logged_in()){
+				$index = 0;
+				$user_id = get_current_user_id();
+				$meta = get_user_meta($user_id, 'wishlist_user_TOP', true);
+				if($meta){
+					if(is_serialized($meta)) unserialize($meta);
+					$index = count($meta);
+					$index = ($index) ? $index : 0;
+				}
+				$return = '<a href="'.home_url('/lista-de-deseos/').'" title="Enlace a la página de tu lista de deseos">
+								<div class="container_wishlist_btn '.$diferent.'">
+									<div class="content_wihslits_btn">
+										<div class="content_counter">
+											<span class="counter_wishlist_shrtcd_TOP">'.$index.'</span>
+										</div>
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>
+									</div>
+								</div>
+							</a>';
+			}
+			return $return;
+		}
+
+		public function footer_copyright_campcllbck(){
+			$return = '<div class="container_copyright_footer_TOP">
+							<h6>&#169 TopCampamentos '.date('Y').' || Buscador de campamentos de Verano en España y Extranjero</h6>
+						</div>';
+			return $return;
+		}
+
+		public function name_company_camp_pg_cllbck(){
+			global $post;
+			$post_id = $post->ID;
+			$return = '';
+			$author = get_post_field('post_author', $post_id);
+			if($author){
+				$company_name  = get_the_author_meta('display_name', $author);
+				if($company_name){
+					$return = '<h4 class="diplay_name_company_camp">'.$company_name.'</h4>';
+				}else{
+					$return = '<h4 class="diplay_name_company_camp">TOP Campamentos</h4>';
+				}
+			}else{
+				$return = '<h4 class="diplay_name_company_camp">TOP Campamentos</h4>';
+			}
+			return $return;
+		}
+
+		public function hide_data_no_client($data, $order){
+			return '';
+		}
+
+		public function cart_item_remove_link( $cart_item_remove_link, $cart_item_key ) {
+		    return '';
+		}
+
+		public function send_verify_activation($user_id){
+			$user_info = get_userdata($user_id);
+			if(!in_array('subscriber', (array) $user_info->roles) && !in_array('customer', (array) $user_info->roles)) return;
+			$code = md5(time());
+			$code_url = array('id'=>$user_id, 'code'=>$code);
+			update_user_meta($user_id, 'account_activated', 0);
+			update_user_meta($user_id, 'activation_code', $code);
+			$url = get_site_url(). '/mi-cuenta/?code=' .base64_encode( serialize($code_url));
+			$mensaje = '<h1>¡Hola '.$user_info->user_login.'!</h1>
+				<p>Gracias por registrarte en nuestro sitio. Para activar tu cuenta, por favor haz clic en el siguiente enlace: <br> <a href="'.esc_url($url).'">activar cuenta</a>.</p>';
+			$data = [
+				"nombre"	=> $user_info->user_login,
+				"mensaje"	=> $mensaje,
+			];
+			$this->mail($user_info->user_email, "Activación de cuenta", "activacion-user", $data);
+		}
+
+		public function verify_activation_user_cllbck(){
+			if(isset($_GET['code']) && !empty($_GET['code'])){
+				$data = unserialize(base64_decode($_GET['code']));
+				if (is_array($data)) {
+				$user_id = $data['id'];
+				$url_code = $data['code'];
+				$user_code = get_user_meta($user_id, 'activation_code', true);
+					if($user_code == $url_code) {
+						delete_user_meta($user_id, 'activation_code');
+						update_user_meta($data['id'], 'top_account_validated', 1);
+						add_action('wp_footer', function(){?>
+							<script>
+								var urlActual = window.location.href.split('?')[0];
+								history.pushState(null, null, urlActual);
+								alert('¡Cuenta activada con éxito! ¡Bienvenido/a!', true);
+							</script>
+						<?php });
+					}else{
+						add_action('wp_footer', function(){?>
+							<script>
+								var urlActual = window.location.href.split('?')[0];
+								history.pushState(null, null, urlActual);
+								alert('Tu cuenta ya ha sido activada previamente. ¡Gracias por tu confirmación!');
+							</script>
+						<?php });
+					}
+				}
+			}
+		}
+
+		public function validate_to_login_TOP($errors, $username, $password){
+			error_log("Validacion de correo");
+			if($errors->has_errors()) return $errors;
+			$user = get_user_by('login', $username);
+			if( !$user ){
+				$user = get_user_by('email', $username);
+				if( !$user ){
+					$errors->add('account_not_fount', "Cuenta no encontrada");
+					return $errors;
+				}
+			} 
+			if(in_array('gestor_campamento', (array) $user->roles)){
+				$creds = array(
+					'user_login'    => $user->user_login,
+					'user_password' => sanitize_text_field($password),
+					'remember'      => 1
+				);
+				$user_login = wp_signon( $creds, is_ssl() );
+				if ( is_wp_error( $user_login ) ) {
+					$errors->add('account_error', "Datos incorrectos");
+					return $errors;
+				}else{
+					wp_redirect(  get_site_url() . '/dashboard/');
+					exit;
+				}
+			}else{
+				$meta_value = get_user_meta($user->ID, 'top_account_validated', true);
+				if(empty($meta_value)){
+					$message = '¡Aún no puedes acceder! Por favor, verifica tu cuenta utilizando el correo que te enviamos.';
+					$errors->add('account_not_verified', $message);
+				}
+			}
+			return $errors;
+		}
+
+		public function desconect_register_TOP($redirect) {
+			wp_logout();
+			$redirect = site_url('gracias-por-registrarte');
+			return $redirect;
+		}
+
+		public function activities_camps_2_cllbck(){
+			global $post;
+			$post_id = $post->ID;
+			$return = '';
+			$meta = get_post_meta($post_id, 'actividades2', true);
+			if($meta){
+				if(is_serialized($meta)) unserialize($meta);
+				$new_meta = [];
+				foreach($meta as $k => $v){
+					if($v == 'true') $new_meta[] = $k;
+				}
+
+				if(!empty($new_meta)){
+					$return = '<div class="container_act2_shrt_TOP">';
+					foreach($new_meta as $act){
+						$return .= '<li class="acts2_shrt_TOP">'.$act.'</li>';
+					}
+					$return .= '</div>';
+				}else{
+					$return = '<h2 class="act2_empty_message">Sin actividades cargadas por el momento</h2>';
+				}
+			}else{
+				$return = '<h2 class="act2_empty_message">Sin actividades cargadas por el momento</h2>';
+			}
+			return $return;
+		}
+
+		public function stripe_procesing_TOP($order_id, $posted_data, $order){
+			if ($order->get_payment_method() == 'stripe') {
+				$order->update_status('completed');
+				$order->save();
+			}
+		} 
+ 
+	}
+	$GLOBAL['adpnsy'] = new adpnsy();
+}

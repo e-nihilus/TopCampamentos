@@ -1,0 +1,8 @@
+[01-Nov-2023 21:37:53 Europe/Madrid] PHP Fatal error:  Uncaught Error: Undefined constant "ABSPATH" in /home/aiycbdhv/public_html/wp-includes/blocks/index.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/aiycbdhv/public_html/wp-includes/blocks/index.php on line 8
+[15-Nov-2023 09:35:57 Europe/Madrid] PHP Fatal error:  Uncaught Error: Undefined constant "ABSPATH" in /home/aiycbdhv/public_html/wp-includes/blocks/index.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/aiycbdhv/public_html/wp-includes/blocks/index.php on line 8

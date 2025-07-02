@@ -1,0 +1,83 @@
+WP_REST_Response Object
+(
+    [data] => Array
+        (
+            [success] => 1
+            [message] => *Already reviewed
+            [code] => review-created
+            [data] => Array
+                (
+                    [item] => Array
+                        (
+                            [id] => 4
+                            [source] => post
+                            [source_type] => topcampamentos
+                            [author] => Array
+                                (
+                                    [id] => 1
+                                    [name] => agenciasp
+                                    [mail] => yo@agenciasp.com
+                                    [avatar] => <img alt='' src='http://0.gravatar.com/avatar/943698dee9e2ddbec10dd31fc528c9cd?s=64&#038;d=mm&#038;r=g' srcset='http://0.gravatar.com/avatar/943698dee9e2ddbec10dd31fc528c9cd?s=128&#038;d=mm&#038;r=g 2x' class='avatar avatar-64 photo' height='64' width='64' loading='lazy' decoding='async'/>
+                                    [roles] => Array
+                                        (
+                                            [0] => administrator
+                                        )
+
+                                )
+
+                            [date] => Array
+                                (
+                                    [raw] => 2023-05-01 20:00:04
+                                    [human_diff] => 1 segundo ago
+                                )
+
+                            [title] => 
+                            [content] => La señora de limpieza es lo más cool que hay en ese campamento
+                            [type_slug] => default
+                            [rating_data] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [field_label] => Rating
+                                            [field_value] => 1
+                                            [field_step] => 1
+                                            [field_max] => 5
+                                        )
+
+                                )
+
+                            [rating] => 20
+                            [comments] => Array
+                                (
+                                )
+
+                            [approved] => 
+                            [like] => 0
+                            [dislike] => 0
+                            [approval] => Array
+                                (
+                                    [like] => 
+                                    [dislike] => 
+                                )
+
+                            [pinned] => 
+                            [verifications] => 
+                        )
+
+                    [rating] => 83.25
+                )
+
+        )
+
+    [headers] => Array
+        (
+        )
+
+    [status] => 200
+    [links:protected] => Array
+        (
+        )
+
+    [matched_route:protected] => 
+    [matched_handler:protected] => 
+)

@@ -1,0 +1,102 @@
+.woocommerce-orders-table .woocommerce-orders-table__header {
+    font-family: "Inter Tight", Sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var( --e-global-color-secondary );
+    border-style: solid;
+    border-width: 0px 2px 0px 0px;
+    border-color: #CCCCCC;
+    padding: 7px 7px 7px 7px;
+}
+
+.woocommerce-orders-table tr.woocommerce-orders-table__row td.woocommerce-orders-table__cell {
+    font-family: "Inter Tight", Sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var( --e-global-color-text );
+    background-color: #02010100;
+    border-style: solid;
+    border-width: 2px 2px 0px 0px;
+    border-color: #CCCCCC;
+    padding: 7px 7px 7px 7px;
+}
+
+.woocommerce-orders-table tr.woocommerce-orders-table__row td.woocommerce-orders-table__cell a {
+    color: var( --e-global-color-primary );
+}
+
+.woocommerce-orders-table tr.woocommerce-orders-table__row td.woocommerce-orders-table__cell a.woocommerce-button {
+    font-size: 14px;
+    color: #FFFFFF !important;
+    background-color: var( --e-global-color-secondary );
+    border-style: solid;
+    border-width: 1px 1px 1px 1px;
+    border-color: var( --e-global-color-secondary );
+    border-radius: 15px 15px 15px 15px;
+    padding: 5px 15px 5px 15px;
+}
+
+.woocommerce-orders-table tr.woocommerce-orders-table__row td.woocommerce-orders-table__cell a.woocommerce-button:hover, .woocommerce-orders-table tr.woocommerce-orders-table__row td.woocommerce-orders-table__cell a.woocommerce-button:focus {
+    color: #000E28 !important;
+    background-color: #FFFFFF;
+}
+
+.woocommerce-pagination a.woocommerce-button {
+    font-family: "Inter Tight", Sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var( --e-global-color-secondary );
+    padding: 5px 5px 5px 5px;
+}
+
+.woocommerce-pagination {
+    text-align: right;
+}
+
+.woocommerce-info {
+    font-family: "Inter Tight", Sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var( --e-global-color-secondary );
+    border-style: solid;
+    border-width: 3px 0px 0px 0px;
+    border-color: #000E28D4;
+    border-radius: 0px 0px 0px 0px;
+    padding: 25px 20px 15px 70px;
+}
+
+.woocommerce-info .button {
+    color: #FFFFFF !important;
+    background-color: var( --e-global-color-secondary );
+    border-style: solid;
+    border-width: 2px 2px 2px 2px;
+    border-color: var( --e-global-color-secondary );
+    border-radius: 15px 15px 15px 15px;
+    padding: 10px 10px 10px 10px;
+}
+
+.woocommerce-info .button:hover, .woocommerce-info .button:focus {
+    color: #000E28 !important;
+    background-color: #FFFFFF00;
+}
+
+.woocommerce-info:before {
+    color: var( --e-global-color-secondary );
+    font-size: 22px;
+}
+
+@media(max-width: 767px) {
+    .woocommerce-info {
+        font-size:14px;
+        padding: 18px 15px 15px 60px;
+    }
+
+    .woocommerce-info .button {
+        font-size: 14px;
+        padding: 7px 10px 7px 10px;
+    }
+
+    .woocommerce-info:before {
+        font-size: 18px;
+    }
+}

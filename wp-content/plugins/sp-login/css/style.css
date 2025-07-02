@@ -1,0 +1,850 @@
+/* ------------------------------
+ -- Direcciones
+ ------------------------------ */
+
+/* #order_exty_dir_field .exty_dir_sel {
+    width: calc(100% - 120px);
+    display: inline-block;
+}
+
+#order_exty_dir_field .exty_dir_btn {
+    background-color: #D33741;
+    color: #fff;
+    height: 40px;
+    width: 115px;
+}
+
+#order_exty_dir_field label {
+    font-size: 26px;
+    font-weight: bold;
+} */
+
+
+/* ------------------------------
+ -- General
+ ------------------------------ */
+
+ /* .spuser_cont {
+    max-width: 470px;
+    width: 90%;
+    background-color: white;
+    box-shadow: 0px 0px 6px #ddd;
+    border-radius: 2px;
+    left: 50%;
+    top: 40%;
+    position: absolute;
+    transform: translate(-50%, 0%);
+    transition: all 1s;
+    opacity: 0;
+    display: none;
+}
+
+.spuser_cont.active {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+}
+
+.spuser_head {
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    height: 50px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.spuser_body {
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.spuser_titulo {
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.spuser_close {
+    background-color: #D33741;
+    width: 50px;
+    height: 50px;
+    display: block;
+    text-align: center;
+    color: #fff;
+    font-size: 18px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    line-height: 50px;
+    cursor: pointer;
+}
+
+.spuser_footer {
+    margin: 14px 20px;
+    position: relative;
+    height: 32px;
+    text-align: center;
+}
+
+.spuser_item {
+    margin-bottom: 25px;
+    position: relative;
+    padding-top: 10px;
+}
+
+.spuser_item .spuser_input {
+    width: 100%;
+    padding: 5px 10px;
+    border: 1px solid #666;
+    border-radius: 3px;
+    font-size: 15px;
+    line-height: 15px;
+}
+
+.spuser_item .spuser_input+label {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    padding: 8px 10px;
+    line-height: 15px;
+    font-size: 15px;
+    top: 10px;
+    transition: .5s all;
+}
+
+.spuser_item .spuser_input:focus+label, .spuser_item .spuser_input.active+label {
+    font-size: 12px;
+    line-height: 12px;
+    top: -13px;
+    left: -7px;
+}
+
+.spuser_link a:nth-child(1) {
+    float: left;
+}
+
+.spuser_link a:nth-child(2) {
+    float: right;
+}
+
+.spuser_link {
+    position: relative;
+    height: 30px;
+}
+
+.spuser_link a {
+    font-size: 15px;
+    color: #D33741;
+    line-height: 30px;
+}
+
+.spuser_link a:hover {
+    color: #000;
+}
+
+.spuser_footer .spuser_btn {
+    display: inline-block;
+    font-weight: 400;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid #D33741;
+    background-color: #D33741;
+    padding: 2px 15px;
+    font-size: 15px;
+    border-radius: 3;
+    -webkit-transition: all .3s;
+    -o-transition: all .3s;
+    transition: all .3s;
+    line-height: 25px;
+    width: 200px;
+    transform: scale(1);
+}
+
+.spuser_footer .spuser_btn:hover {
+    transform: scale(1.1);
+}
+
+.spuser_item_cont {
+    display: flex;
+    justify-content: space-between;
+}
+
+.spuser_item.spuser_item_50 {
+    width: calc(50% - 5px);
+}
+
+.spuser_item.spuser_item_33 {
+    width: calc(33.3333% - 5px);
+}
+
+#spuser_register {
+    top: 50%;
+}
+
+#spuser_register_data {
+    max-height: calc(100vh - 250px);
+    overflow: auto;
+    width: calc(100% + 10px);
+    padding-right: 10px;
+    margin-top: -10px;
+    padding-top: 10px;
+}
+
+.spuser_item .spuser_input+label span {
+    color: red;
+    margin-left: 3px;
+    font-weight: bold;
+}
+*/
+.spuser_input.invalido+label {
+    color: red;
+}
+
+.spuser_input.invalido {
+    border-color: red;
+} 
+
+/* -------------------------------
+ -- Alert
+ -------------------------------- */
+
+  .spuser_alert {
+      background-color: #ffffff96;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 99999;
+      transition: all .5s ease;
+      opacity: 0;
+  }
+
+  .spuser_alert_cont {
+      max-width: 600px;
+      background-color: white;
+      position: absolute;
+      width: 90%;
+      left: 50%;
+      top: 10%;
+      transform: translate(-50%, -100%);
+      padding: 20px;
+      box-shadow: 0 0 7px 0 #00000078;
+      transition: all .5s;
+  }
+
+  img.spuser_alert_img {
+      width: 40px;
+      max-width: 100%;
+      display: block;
+      margin-right: 15px;
+      position: absolute;
+      top: 50%;
+      margin-top: -23px;
+  }
+
+  .spuser_alert_close {
+      position: absolute;
+      color: #fff !important;
+      background-color: #b0000e;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      right: -10px;
+      top: -10px;
+      display: block;
+      cursor: pointer;
+      transition: all .5s;
+  }
+
+  .spuser_alert_close:hover {
+      transform: scale(1.1);
+  }
+
+  p.spuser_alert_text {
+      margin-bottom: 0;
+      font-size: 16px;
+      padding-left: 55px;
+      font-family: "Inter Tight", sans-serif;
+      font-weight: 500;
+      color: #444;
+  }
+
+  .spuser_alert.show {
+      opacity: 1;
+  }
+
+  .spuser_alert.show .spuser_alert_cont {
+      transform: translate(-50%, 0%);
+  }
+
+/* -------------------------------
+ -- Loading
+ -------------------------------- */
+
+.spuser_modal {
+    background-color: #ffffff94;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    display: none;
+}
+
+.spuser_modal_load {
+    width: 300px;
+    background-color: white;
+    box-shadow: 0px 0px 6px #ddd;
+    border-radius: 2px;
+    left: 50%;
+    top: 40%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    text-align: center;
+}
+
+.spuser_modal_load_title {
+    font-size: 25px;
+    margin-bottom: 0px;
+}
+
+.spuser_modal_load_title span:nth-child(2) {
+    animation-duration: 1s;
+    animation-delay: 0.2s;
+    animation-name: ani;
+    animation-iteration-count: infinite;
+}
+
+.spuser_modal_load_title span:nth-child(3) {
+    animation-duration: 1s;
+    animation-delay: 0.4s;
+    animation-name: ani;
+    animation-iteration-count: infinite;
+}
+
+.spuser_modal_load_title span:nth-child(4) {
+    animation-duration: 1s;
+    animation-delay: 0.6s;
+    animation-name: ani;
+    animation-iteration-count: infinite;
+}
+
+@keyframes ani {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* -------------------- */
+
+/* span.woocommerce-input-wrapper {
+    display: flex;
+    column-gap: 12px;
+}
+
+button#dlt_dir_expo {
+    display: none;
+} */
+
+/* --------------------- */
+
+/* --- TOP CAMPAMENTOS CUSTOM STYLE REGISTER ---  */
+.portal_campamento {
+    padding: 75px 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.portal_campamento .logotipo_TOP {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.portal_campamento .logotipo_TOP img {
+    width: 300px;
+}
+
+.portal_campamento .login-register-tabs {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.portal_campamento .login-register-tabs h4 {
+    padding: 0;
+    margin: 0;
+    font-family: "Inter Tight", Sans-serif;
+    font-size: 20px;
+    color: #000E28;
+    padding: 10px 30px;
+    flex: 0 0 40%;
+    text-align: center;
+    cursor: pointer;
+    transition: .3s;
+    border-bottom: 3px solid transparent;
+    font-weight: 700;
+}
+
+.portal_campamento .login-register-tabs h4:hover, .portal_campamento .login-register-tabs h4.current_tab {
+    transition: .3s;
+    border-color: #F30C0C;
+    color: #F30C0C;
+    font-weight: 700;
+}
+
+.portal_campamento .forms {
+    width: 100%;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 80%;
+    margin: auto;
+    padding: 30px 0 20px 0;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item input {
+    border: 1px solid #CCCCCC;
+    border-radius: 15px;
+    width: 100%;
+    padding: 10px 20px 10px 15px;
+    font-family: "Inter Tight", Sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #444;
+    outline: none;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 15px;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont * {
+    width: 100%;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div input, .portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div select {
+    border: 1px solid #CCCCCC;
+    border-radius: 15px;
+    width: 100%;
+    padding: 10px 20px 10px 15px;
+    font-family: "Inter Tight", Sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #444;
+    outline: none;
+}
+
+.spuser_item_cont .spuser_item.spuser_item_33:last-child {
+    grid-column: 1 / span 2;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body .spuser_link {
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body .spuser_link label {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    font-family: "Inter Tight", Sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    column-gap: 5px;
+    color: #000E28;
+}
+
+
+.portal_campamento .forms .spuser_cont .spuser_body .spuser_link label a {
+    color: #F30C0C;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.portal_campamento .forms .spuser_footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    margin: auto;
+    padding: 20px 0;
+}
+
+.portal_campamento .forms .spuser_footer button {
+    flex: 1 0 50%;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background: #F30C0C;
+    font-family: "Inter Tight", Sans-serif;
+    font-size: 16px;
+    transition: .3s;
+    border: 2px solid #F30C0C;
+}
+
+.portal_campamento .forms .spuser_footer button:hover {
+    transition: .3s;
+    background: none;
+    color: #F30C0C;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div select option {
+    color: #555;
+    font-size: 16px;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div input:focus, .portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div select:focus {
+    border-color: #000E28;
+    color: #000E28;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item input:focus {
+    border-color: #000E28;
+    color: #000E28;
+}
+
+.portal_campamento .forms .spuser_body.login {
+    width: 80%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    row-gap: 15px;
+    padding: 30px 0 20px 0;
+}
+
+.portal_campamento .forms .spuser_body.login .spuser_item input {
+    border: 1px solid #CCCCCC;
+    border-radius: 15px;
+    width: 100%;
+    padding: 10px 20px 10px 15px;
+    font-family: "Inter Tight", Sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #444;
+    outline: none;
+}
+
+.portal_campamento .forms .spuser_body.login .spuser_item input:focus {
+    border-color: #000E28;
+    color: #000E28;
+}
+
+.portal_campamento .forms .spuser_body.login .spuser_link {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+    flex-direction: row-reverse;
+    padding: 10px 20px;
+}
+
+.portal_campamento .forms .spuser_body.login .spuser_link a {
+    flex: 1 0 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Inter Tight", Sans-serif;
+    color: #F30C0C;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.portal_campamento .forms .spuser_footer.login {
+    padding: 0;
+}
+
+.portal_campamento .forms .spuser_body.recovery {
+    width: 80%;
+    margin: auto;
+    padding: 30px 0 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.portal_campamento .forms .spuser_body.recovery .spuser_item input {
+    border: 1px solid #CCCCCC;
+    border-radius: 15px;
+    width: 100%;
+    padding: 10px 20px 10px 15px;
+    font-family: "Inter Tight", Sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #444;
+    outline: none;
+}
+
+.portal_campamento .forms .spuser_body.recovery .spuser_item input:focus {
+    border-color: #000E28;
+    color: #000E28;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body .spuser_link.recovery {
+    gap: 15px;
+    padding: 0;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body .spuser_link.recovery a {
+    font-family: "Inter Tight", Sans-serif;
+    color: #F30C0C;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.portal_campamento .forms .spuser_footer.recovery {
+    padding: 0;
+}
+
+.portal_campamento .forms .spuser_body.recovery2 {
+    width: 80%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 30px 0 20px 0;
+}
+
+.portal_campamento .forms .spuser_body.recovery2 .spuser_item input {
+    border: 1px solid #CCCCCC;
+    border-radius: 15px;
+    width: 100%;
+    padding: 10px 20px 10px 15px;
+    font-family: "Inter Tight", Sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #444;
+    outline: none;
+}
+
+.portal_campamento .forms .spuser_body.recovery2 .spuser_item input:focus {
+    border-color: #000E28;
+    color: #000E28;
+}
+
+.portal_campamento .forms .spuser_footer.recovery2 {
+    padding: 0;
+}
+
+.portal_campamento .forms .spuser_head.recovery {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 0 0 0;
+}
+
+.portal_campamento .forms .spuser_head.recovery span {
+    font-family: "Inter Tight", Sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: #333;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div input.invalido, .portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div select.invalido {
+    border-color: #F30C0C;
+    color: #F30C0C;
+}
+
+.portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item input.invalido {
+    border-color: #F30C0C;
+}
+
+.spuser_modal_load_title {
+    font-size: 16px;
+    font-family: "Inter Tight", Sans-serif;
+    color: #333;
+}
+
+.flags_portal_TOP .elementor-widget-container > .lang-item {
+    display: none;
+}
+
+.info_banderas_select_header {
+    z-index: 100;
+}
+
+.flags_portal_TOP .elementor-shortcode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flags_portal_TOP {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.r_portal_head_TOP {
+    padding: 10px 0;
+}
+
+.content_portal_TOP, .fondo_sideback_registro_TOP {
+    height: 135vh;
+    min-height: 135vh;
+}
+
+.fondo_sideback_registro_TOP .elementor-background-overlay {
+    background: rgba(0,0,0,.55);
+}
+
+/* ------- RESPONSIVE ------  */
+@media(max-width: 1024px){
+
+    .portal_campamento {
+        padding: 50px 25px;
+        background: #fff;
+        width: 80%;
+        margin: auto;
+        border-radius: 20px;
+    }
+
+    .portal_campamento .logotipo_TOP {
+        display: none;
+    }
+
+    .content_portal_TOP {
+        height: auto;
+        min-height: 0;
+    }
+
+}
+
+@media(max-width: 767px){
+
+    .portal_campamento {
+        padding: 25px 15px;
+        width: 90%;
+        margin-bottom: 40px;
+    }
+
+    .portal_campamento .forms .spuser_cont .spuser_body form {
+        width: 100%;
+        gap: 15px;
+        padding: 20px 0 10px 0;
+    }
+
+    .portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont {
+        gap: 10px;
+    }
+
+    .portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item input {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .portal_campamento .login-register-tabs h4 {
+        font-size: 18px;
+        padding: 5px 15px;
+    }
+
+    .portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div input, .portal_campamento .forms .spuser_cont .spuser_body form > .spuser_item_cont div select {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .portal_campamento .forms .spuser_cont .spuser_body .spuser_link label {
+        font-size: 12px;
+    }
+    
+    .portal_campamento .forms .spuser_footer {
+        padding: 10px 0;
+    }
+    
+    .portal_campamento .forms .spuser_footer button {
+        padding: 7px;
+        font-size: 14px;
+    }
+
+    .portal_campamento .forms .spuser_body.login {
+        width: 100%;
+        padding: 20px 0 10px 0;
+        gap: 10px;
+    }
+    
+    .portal_campamento .forms .spuser_body.login .spuser_item input {
+        font-size: 14px;
+        padding: 10px;
+    }
+    
+    .portal_campamento .forms .spuser_body.login .spuser_link {
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .portal_campamento .forms .spuser_body.login .spuser_link a {
+        flex: 1 0 20%;
+        font-size: 12px;
+    }
+
+    .portal_campamento .forms .spuser_body.recovery {
+        padding: 20px 0 20px 0;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    .portal_campamento .forms .spuser_body.recovery .spuser_item input {
+        font-size: 14px;
+        padding: 10px;
+    }
+    
+    .portal_campamento .forms .spuser_cont .spuser_body .spuser_link.recovery {
+        gap: 10px;
+    }
+    
+    .portal_campamento .forms .spuser_cont .spuser_body .spuser_link.recovery a {
+        font-size: 12px;
+    }
+    .portal_campamento .forms .spuser_body.recovery2 {
+        width: 100%;
+        gap: 10px;
+        padding: 20px 0 20px 0;
+    }
+    
+    .portal_campamento .forms .spuser_body.recovery2 .spuser_item input {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .portal_campamento .forms .spuser_head.recovery {
+        padding: 20px 0 0 0;
+    }
+    
+    .portal_campamento .forms .spuser_head.recovery span {
+        font-size: 16px;
+    }
+
+    .portal_campamento .forms .spuser_cont .spuser_body .spuser_link label a {
+        font-size: 12px;
+    }
+ 
+}
+/* ------- RESPONSIVE ------  */
+
+/* --- TOP CAMPAMENTOS CUSTOM STYLE REGISTER ---  */

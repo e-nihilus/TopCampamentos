@@ -1,0 +1,128 @@
+{
+    "post": {
+        "form": {
+            "id": "e1f14e8",
+            "name": "Mensajes"
+        },
+        "fields": {
+            "message": {
+                "id": "message",
+                "type": "textarea",
+                "title": "Mensaje",
+                "value": "Hola",
+                "raw_value": "Hola",
+                "required": "1"
+            },
+            "campamento": {
+                "id": "campamento",
+                "type": "hidden",
+                "title": "campamento",
+                "value": "1664",
+                "raw_value": "1664",
+                "required": "0"
+            },
+            "user": {
+                "id": "user",
+                "type": "hidden",
+                "title": "user",
+                "value": "1",
+                "raw_value": "1",
+                "required": "0"
+            },
+            "field_5a3a1cb": {
+                "id": "field_5a3a1cb",
+                "type": "acceptance",
+                "title": "Aceptaci\u00f3n de pol\u00edticas",
+                "value": "on",
+                "raw_value": "on",
+                "required": "1"
+            }
+        }
+    },
+    "get": {
+        "action": "admin_panel",
+        "send_message": "true"
+    },
+    "request": {
+        "action": "admin_panel",
+        "send_message": "true",
+        "form": {
+            "id": "e1f14e8",
+            "name": "Mensajes"
+        },
+        "fields": {
+            "message": {
+                "id": "message",
+                "type": "textarea",
+                "title": "Mensaje",
+                "value": "Hola",
+                "raw_value": "Hola",
+                "required": "1"
+            },
+            "campamento": {
+                "id": "campamento",
+                "type": "hidden",
+                "title": "campamento",
+                "value": "1664",
+                "raw_value": "1664",
+                "required": "0"
+            },
+            "user": {
+                "id": "user",
+                "type": "hidden",
+                "title": "user",
+                "value": "1",
+                "raw_value": "1",
+                "required": "0"
+            },
+            "field_5a3a1cb": {
+                "id": "field_5a3a1cb",
+                "type": "acceptance",
+                "title": "Aceptaci\u00f3n de pol\u00edticas",
+                "value": "on",
+                "raw_value": "on",
+                "required": "1"
+            }
+        },
+        "woocommerce-login-nonce": null,
+        "_wpnonce": null,
+        "woocommerce-reset-password-nonce": null
+    },
+    "header": {
+        "SERVER_SOFTWARE": "LiteSpeed",
+        "REQUEST_URI": "\/wp-admin\/admin-ajax.php?action=admin_panel&send_message=true",
+        "PATH": "\/usr\/local\/bin:\/bin:\/usr\/bin",
+        "HTTP_ACCEPT": "*\/*",
+        "HTTP_ACCEPT_ENCODING": "deflate, gzip, br",
+        "HTTP_CONNECTION": "close",
+        "CONTENT_TYPE": "application\/x-www-form-urlencoded",
+        "CONTENT_LENGTH": "1004",
+        "HTTP_HOST": "topcampamentos.com",
+        "HTTP_REFERER": "http:\/\/topcampamentos.com\/wp-admin\/admin-ajax.php?action=admin_panel&send_message=true",
+        "HTTP_USER_AGENT": "WordPress\/6.1.1; http:\/\/topcampamentos.com",
+        "DOCUMENT_ROOT": "\/home\/aiycbdhv\/public_html",
+        "REMOTE_ADDR": "2a12:d280:100:56::",
+        "REMOTE_PORT": "60176",
+        "SERVER_ADDR": "2a12:d280:100:56::",
+        "SERVER_NAME": "topcampamentos.com",
+        "SERVER_ADMIN": "webmaster@topcampamentos.com",
+        "SERVER_PORT": "80",
+        "REQUEST_SCHEME": "http",
+        "noabort": "1",
+        "SCRIPT_FILENAME": "\/home\/aiycbdhv\/public_html\/wp-admin\/admin-ajax.php",
+        "QUERY_STRING": "action=admin_panel&send_message=true",
+        "SCRIPT_URI": "http:\/\/topcampamentos.com\/wp-admin\/admin-ajax.php",
+        "SCRIPT_URL": "\/wp-admin\/admin-ajax.php",
+        "SCRIPT_NAME": "\/wp-admin\/admin-ajax.php",
+        "SERVER_PROTOCOL": "HTTP\/1.1",
+        "REQUEST_METHOD": "POST",
+        "X-LSCACHE": "on",
+        "PHP_SELF": "\/wp-admin\/admin-ajax.php",
+        "REQUEST_TIME_FLOAT": 1680019621.529756069183349609375,
+        "REQUEST_TIME": 1680019621,
+        "argv": [
+            "action=admin_panel&send_message=true"
+        ],
+        "argc": 1
+    }
+}

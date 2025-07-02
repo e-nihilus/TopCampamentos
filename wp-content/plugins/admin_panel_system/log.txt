@@ -1,0 +1,63 @@
+Array
+(
+    [form] => Array
+        (
+            [id] => 5839b45
+            [name] => Mensajes
+        )
+
+    [fields] => Array
+        (
+            [source_id] => Array
+                (
+                    [id] => source_id
+                    [type] => hidden
+                    [title] => campamento
+                    [value] => 2111
+                    [raw_value] => 2111
+                    [required] => 0
+                )
+
+            [start_cant] => Array
+                (
+                    [id] => start_cant
+                    [type] => select
+                    [title] => estrellas
+                    [value] => 1
+                    [raw_value] => 1
+                    [required] => 1
+                )
+
+            [message] => Array
+                (
+                    [id] => message
+                    [type] => textarea
+                    [title] => Mensaje
+                    [value] => La señora de limpieza es lo más cool que hay en ese campamento
+                    [raw_value] => La señora de limpieza es lo más cool que hay en ese campamento
+                    [required] => 1
+                )
+
+            [user] => Array
+                (
+                    [id] => user
+                    [type] => hidden
+                    [title] => user
+                    [value] => 1
+                    [raw_value] => 1
+                    [required] => 0
+                )
+
+            [field_5a3a1cb] => Array
+                (
+                    [id] => field_5a3a1cb
+                    [type] => acceptance
+                    [title] => Aceptación de políticas
+                    [value] => on
+                    [raw_value] => on
+                    [required] => 1
+                )
+
+        )
+
+)

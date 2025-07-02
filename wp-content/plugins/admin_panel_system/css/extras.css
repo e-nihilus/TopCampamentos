@@ -1,0 +1,100 @@
+.adpnsy_content {
+    width: 100%;
+    max-width: 900px;
+    background-color: #fff;
+    padding: 10px;
+    margin-top: 30px;
+    border: 1px solid #222;
+}
+
+.adpnsy_header {
+    font-size: 20px;
+    font-weight: 600;
+    border-bottom: 1px solid #222;
+    padding: 0 0 10px;
+    margin-bottom: 20px;
+}
+
+table.adpnsy_table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.adpnsy_table th {
+    width: 200px;
+    text-align: left;
+    font-weight: 600;
+    vertical-align: top;
+    font-size: 15px;
+}
+
+table.adpnsy_table td > input:not([type='checkbox']),
+table.adpnsy_table select {
+    width: 100%;
+    max-width: 100%;
+}
+
+table.adpnsy_table textarea {
+    width: 100%;
+    height: 100px;
+}
+
+table.adpnsy_table tr:nth-child(2n) {
+    background-color: #eaeaea;
+}
+
+table.adpnsy_table tr > * {
+    padding: 10px;
+    position: relative;
+}
+
+.adpnsy_table td > .button.action {
+    position: absolute;
+    right: 9px;
+    top: 10px;
+}
+
+.buttons-footer {
+    padding: 10px;
+}
+
+.row {
+    display: flex;
+}
+
+.col-3 {
+    width: 33.33%;
+}
+
+.col-9.text-right {
+    width: 66.66%;
+    text-align: right;
+}
+
+.buttons-footer .dashicons {
+    line-height: 30px;
+    font-size: 20px;
+}
+
+.buttons-footer {
+    position: sticky;
+    bottom: -10px;
+    background-color: #fff;
+    border-top: 1px solid #cacaca;
+    left: 0;
+}
+
+.adpnsy_content.buttons-footer{
+    border-top: 1px solid #222;
+    bottom: 0px;
+}
+
+.adpnsy_table td>span+input {
+    padding-right: 30px;
+}
+
+.adpnsy_table td>span {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+}

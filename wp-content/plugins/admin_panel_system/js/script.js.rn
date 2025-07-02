@@ -1,0 +1,679 @@
+$.fn.serializeObject = function() {var o = {};var a = this.serializeArray();$.each(a, function() {if (o[this.name]) {if (!o[this.name].push) {o[this.name] = [o[this.name]];}o[this.name].push(this.value || '');} else {o[this.name] = this.value || '';}});return o;};
+const alert_confirm = function(text, fun){var img = '<img alt="warning" class="spuser_alert_img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pg0KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNTEyIDUxMjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggc3R5bGU9ImZpbGw6IzNCNDE0NTsiIGQ9Ik0zMjIuOTM5LDYyLjY0MmwxNzguNzM3LDMwOS41ODNDNTA4LjIzMSwzODMuNTc4LDUxMiwzOTYuNzQsNTEyLDQxMC43OTENCgljMCw0Mi42Ny0zNC41OTIsNzcuMjY0LTc3LjI2NCw3Ny4yNjRIMjU2TDE5NC4xODksMjU2TDI1NiwyMy45NDZDMjg0LjYyLDIzLjk0NiwzMDkuNTg3LDM5LjUxOSwzMjIuOTM5LDYyLjY0MnoiLz4NCjxwYXRoIHN0eWxlPSJmaWxsOiM1MjVBNjE7IiBkPSJNMTg5LjA2MSw2Mi42NDJMMTAuMzIzLDM3Mi4yMjVDMy43NjksMzgzLjU3OCwwLDM5Ni43NCwwLDQxMC43OTENCgljMCw0Mi42NywzNC41OTIsNzcuMjY0LDc3LjI2NCw3Ny4yNjRIMjU2VjIzLjk0NkMyMjcuMzgsMjMuOTQ2LDIwMi40MTMsMzkuNTE5LDE4OS4wNjEsNjIuNjQyeiIvPg0KPHBhdGggc3R5bGU9ImZpbGw6I0ZGQjc1MTsiIGQ9Ik00NzQuOTEzLDM4Ny42NzhMMjk2LjE3Nyw3OC4wOThjLTguMDU2LTEzLjk1OS0yMi44NDktMjIuNzY3LTM4Ljg0OC0yMy4yMmwxNTIuODY5LDQwMi4yNzVoMjQuNTM5DQoJYzI1LjU1OSwwLDQ2LjM1OC0yMC43OTgsNDYuMzU4LTQ2LjM1OEM0ODEuMDk1LDQwMi42NzcsNDc4Ljk1MiwzOTQuNjgzLDQ3NC45MTMsMzg3LjY3OHoiLz4NCjxwYXRoIHN0eWxlPSJmaWxsOiNGRkQ3NjQ7IiBkPSJNNDQ0Ljg1MywzODcuNjc4YzMuNDkyLDcuMDA1LDUuMzM2LDE0Ljk5OSw1LjMzNiwyMy4xMTdjMCwyNS41NTktMTcuOTM1LDQ2LjM1OC0zOS45OTIsNDYuMzU4DQoJSDc3LjI2NGMtMjUuNTU5LDAtNDYuMzU4LTIwLjc5OS00Ni4zNTgtNDYuMzU4YzAtOC4xMTgsMi4xNDMtMTYuMTEyLDYuMTgxLTIzLjExN2wxNzguNzM2LTMwOS41OA0KCWM4LjI4My0xNC4zNCwyMy42NzQtMjMuMjUxLDQwLjE3Ny0yMy4yNTFjMC40NDMsMCwwLjg4NiwwLjAxLDEuMzI5LDAuMDMxYzEzLjczMiwwLjUzNiwyNi40MTQsOS4zMjMsMzMuMzI2LDIzLjIyTDQ0NC44NTMsMzg3LjY3OHoNCgkiLz4NCjxwYXRoIHN0eWxlPSJmaWxsOiMzQjQxNDU7IiBkPSJNMjU2LDM1NC4xMzF2NTEuNTA5YzE0LjIyNywwLDI1Ljc1NS0xMS41MjgsMjUuNzU1LTI1Ljc1NQ0KCUMyODEuNzU1LDM2NS42NTksMjcwLjIyNywzNTQuMTMxLDI1NiwzNTQuMTMxeiIvPg0KPHBhdGggc3R5bGU9ImZpbGw6IzUyNUE2MTsiIGQ9Ik0yNTYsMzU0LjEzMWMyLjg0MywwLDUuMTUxLDExLjUyOCw1LjE1MSwyNS43NTVjMCwxNC4yMjctMi4zMDgsMjUuNzU1LTUuMTUxLDI1Ljc1NQ0KCWMtMTQuMjI3LDAtMjUuNzU1LTExLjUyOC0yNS43NTUtMjUuNzU1QzIzMC4yNDUsMzY1LjY1OSwyNDEuNzczLDM1NC4xMzEsMjU2LDM1NC4xMzF6Ii8+DQo8cGF0aCBzdHlsZT0iZmlsbDojM0I0MTQ1OyIgZD0iTTI1NiwxMzIuNjQ2VjMyMy4yM2MxNC4yMjcsMCwyNS43NTUtMTEuNTM4LDI1Ljc1NS0yNS43NTVWMTU4LjQwMQ0KCUMyODEuNzU1LDE0NC4xNzQsMjcwLjIyNywxMzIuNjQ2LDI1NiwxMzIuNjQ2eiIvPg0KPHBhdGggc3R5bGU9ImZpbGw6IzUyNUE2MTsiIGQ9Ik0yNTYsMTMyLjY0NmMyLjg0MywwLDUuMTUxLDExLjUyOCw1LjE1MSwyNS43NTV2MTM5LjA3NGMwLDE0LjIxNi0yLjMwOCwyNS43NTUtNS4xNTEsMjUuNzU1DQoJYy0xNC4yMjcsMC0yNS43NTUtMTEuNTM4LTI1Ljc1NS0yNS43NTVWMTU4LjQwMUMyMzAuMjQ1LDE0NC4xNzQsMjQxLjc3MywxMzIuNjQ2LDI1NiwxMzIuNjQ2eiIvPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPC9zdmc+DQo=" />';var el = $("<div />",{class: 'spuser_alert'});el.append($("<div />",{ class: 'spuser_alert_cont' }).append($("<a />",{href:"#", class: 'spuser_alert_close', text: "x"}).on("click", function(e) { e.preventDefault(); el.removeClass("show"); setTimeout(function(){ el.remove() }, 600); })).append( img ).append( $("<p />",{class: 'spuser_alert_text', html: text}) ).append( $("<div />",{class: 'spuser_alert_btns'}).append($("<a />",{href:"#", class: 'spuser_alert_btn spuser_alert_accept', text: "Aceptar"}).on("click", function(e) { fun(); e.preventDefault(); el.removeClass("show"); setTimeout(function(){ el.remove() }, 600); })).append($("<a />",{href:"#", class: 'spuser_alert_btn spuser_alert_cancel', text: "Cancelar"}).on("click", function(e) { fun; e.preventDefault(); el.removeClass("show"); setTimeout(function(){ el.remove() }, 600); })) ));$("body").append(el);setTimeout(function(){ el.addClass("show"); }, 100);return;}
+const alert = function(text, ico = false){if(ico){var img = '<img alt="warning" class="spuser_alert_img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pg0KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgNTAgNTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUwIDUwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Y2lyY2xlIHN0eWxlPSJmaWxsOiMyNUFFODg7IiBjeD0iMjUiIGN5PSIyNSIgcj0iMjUiLz4NCjxwb2x5bGluZSBzdHlsZT0iZmlsbDpub25lO3N0cm9rZTojRkZGRkZGO3N0cm9rZS13aWR0aDoyO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiIHBvaW50cz0iDQoJMzgsMTUgMjIsMzMgMTIsMjUgIi8+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8L3N2Zz4NCg==" />';}else{var img = '<img alt="warning" class="spuser_alert_img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pg0KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNTEyIDUxMjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggc3R5bGU9ImZpbGw6IzNCNDE0NTsiIGQ9Ik0zMjIuOTM5LDYyLjY0MmwxNzguNzM3LDMwOS41ODNDNTA4LjIzMSwzODMuNTc4LDUxMiwzOTYuNzQsNTEyLDQxMC43OTENCgljMCw0Mi42Ny0zNC41OTIsNzcuMjY0LTc3LjI2NCw3Ny4yNjRIMjU2TDE5NC4xODksMjU2TDI1NiwyMy45NDZDMjg0LjYyLDIzLjk0NiwzMDkuNTg3LDM5LjUxOSwzMjIuOTM5LDYyLjY0MnoiLz4NCjxwYXRoIHN0eWxlPSJmaWxsOiM1MjVBNjE7IiBkPSJNMTg5LjA2MSw2Mi42NDJMMTAuMzIzLDM3Mi4yMjVDMy43NjksMzgzLjU3OCwwLDM5Ni43NCwwLDQxMC43OTENCgljMCw0Mi42NywzNC41OTIsNzcuMjY0LDc3LjI2NCw3Ny4yNjRIMjU2VjIzLjk0NkMyMjcuMzgsMjMuOTQ2LDIwMi40MTMsMzkuNTE5LDE4OS4wNjEsNjIuNjQyeiIvPg0KPHBhdGggc3R5bGU9ImZpbGw6I0ZGQjc1MTsiIGQ9Ik00NzQuOTEzLDM4Ny42NzhMMjk2LjE3Nyw3OC4wOThjLTguMDU2LTEzLjk1OS0yMi44NDktMjIuNzY3LTM4Ljg0OC0yMy4yMmwxNTIuODY5LDQwMi4yNzVoMjQuNTM5DQoJYzI1LjU1OSwwLDQ2LjM1OC0yMC43OTgsNDYuMzU4LTQ2LjM1OEM0ODEuMDk1LDQwMi42NzcsNDc4Ljk1MiwzOTQuNjgzLDQ3NC45MTMsMzg3LjY3OHoiLz4NCjxwYXRoIHN0eWxlPSJmaWxsOiNGRkQ3NjQ7IiBkPSJNNDQ0Ljg1MywzODcuNjc4YzMuNDkyLDcuMDA1LDUuMzM2LDE0Ljk5OSw1LjMzNiwyMy4xMTdjMCwyNS41NTktMTcuOTM1LDQ2LjM1OC0zOS45OTIsNDYuMzU4DQoJSDc3LjI2NGMtMjUuNTU5LDAtNDYuMzU4LTIwLjc5OS00Ni4zNTgtNDYuMzU4YzAtOC4xMTgsMi4xNDMtMTYuMTEyLDYuMTgxLTIzLjExN2wxNzguNzM2LTMwOS41OA0KCWM4LjI4My0xNC4zNCwyMy42NzQtMjMuMjUxLDQwLjE3Ny0yMy4yNTFjMC40NDMsMCwwLjg4NiwwLjAxLDEuMzI5LDAuMDMxYzEzLjczMiwwLjUzNiwyNi40MTQsOS4zMjMsMzMuMzI2LDIzLjIyTDQ0NC44NTMsMzg3LjY3OHoNCgkiLz4NCjxwYXRoIHN0eWxlPSJmaWxsOiMzQjQxNDU7IiBkPSJNMjU2LDM1NC4xMzF2NTEuNTA5YzE0LjIyNywwLDI1Ljc1NS0xMS41MjgsMjUuNzU1LTI1Ljc1NQ0KCUMyODEuNzU1LDM2NS42NTksMjcwLjIyNywzNTQuMTMxLDI1NiwzNTQuMTMxeiIvPg0KPHBhdGggc3R5bGU9ImZpbGw6IzUyNUE2MTsiIGQ9Ik0yNTYsMzU0LjEzMWMyLjg0MywwLDUuMTUxLDExLjUyOCw1LjE1MSwyNS43NTVjMCwxNC4yMjctMi4zMDgsMjUuNzU1LTUuMTUxLDI1Ljc1NQ0KCWMtMTQuMjI3LDAtMjUuNzU1LTExLjUyOC0yNS43NTUtMjUuNzU1QzIzMC4yNDUsMzY1LjY1OSwyNDEuNzczLDM1NC4xMzEsMjU2LDM1NC4xMzF6Ii8+DQo8cGF0aCBzdHlsZT0iZmlsbDojM0I0MTQ1OyIgZD0iTTI1NiwxMzIuNjQ2VjMyMy4yM2MxNC4yMjcsMCwyNS43NTUtMTEuNTM4LDI1Ljc1NS0yNS43NTVWMTU4LjQwMQ0KCUMyODEuNzU1LDE0NC4xNzQsMjcwLjIyNywxMzIuNjQ2LDI1NiwxMzIuNjQ2eiIvPg0KPHBhdGggc3R5bGU9ImZpbGw6IzUyNUE2MTsiIGQ9Ik0yNTYsMTMyLjY0NmMyLjg0MywwLDUuMTUxLDExLjUyOCw1LjE1MSwyNS43NTV2MTM5LjA3NGMwLDE0LjIxNi0yLjMwOCwyNS43NTUtNS4xNTEsMjUuNzU1DQoJYy0xNC4yMjcsMC0yNS43NTUtMTEuNTM4LTI1Ljc1NS0yNS43NTVWMTU4LjQwMUMyMzAuMjQ1LDE0NC4xNzQsMjQxLjc3MywxMzIuNjQ2LDI1NiwxMzIuNjQ2eiIvPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPC9zdmc+DQo=" />';}var el = $("<div />",{class: 'spuser_alert'});el.append($("<div />",{ class: 'spuser_alert_cont' }).append( $("<a />",{href:"#", class: 'spuser_alert_close', text: "x"}).on("click", function(e) { e.preventDefault(); el.removeClass("show"); setTimeout(function(){ el.remove() }, 600); }) ).append( img  ).append( $("<p />",{class: 'spuser_alert_text', html: text}) ));$("body").append(el);setTimeout(function(){ el.addClass("show"); }, 100);return;}
+
+const loader = function(element, id) {
+	element.append(`<div loader="${id}" class="loader-unick_TOP">
+						<div class="lds-dual-ring"></div>
+					</div>`);
+}
+
+const loaderEnd = function(element, id) {
+	element.find(`[loader="${id}"]`).remove();
+}
+
+const printMediaCurrentUser = function(k, v) {
+	$(".overlay_custom_dropify .photos .content_photos").append(`
+		<span class="container_image_current_user_adpnsy">
+			<img src="${v.url}" alt="${(v.title) ? v.title : ''}" acgt="${v.id}">
+			<i class="material-icons icon-menu close_media_current_user" dlt="${v.id}">delete</i>
+		</span>
+	`);
+}
+
+
+function move_save_progress_camps(){
+	let save_progress = $(".data_topcampamento_ .save_form");
+	let form = $(".data_topcampamento_");
+	let widthForm = form.outerWidth(true);
+	let height_btm = save_progress.outerHeight(true);
+	form.css({paddingBottom: height_btm});
+	save_progress.css({transition: '.35s', position: 'fixed', right: '0', bottom: '0', width: widthForm, height: height_btm, background: '#fff', zIndex: '10', boxShadow: '0 -7px 14px rgba(0,0,0,.085)'});
+	let ww = $(window);
+	let pBreak = form.offset().top + form.outerHeight(true);
+	$(window).on('scroll', (e)=>{
+		if((ww.scrollTop() + ww.height()) > pBreak){
+			form.css({paddingBottom: '0'});
+			save_progress.css({transition: '.35s', position: 'relative', right: '0', bottom: '0', width: widthForm, height: height_btm, background: '#fff', zIndex: '10', boxShadow: 'none'});
+		}else if((ww.scrollTop() + ww.height()) < pBreak){
+			form.css({paddingBottom: height_btm});
+			save_progress.css({transition: '.35s', position: 'fixed', right: '0', bottom: '0', width: widthForm, height: height_btm, background: '#fff', zIndex: '10', boxShadow: '0 -7px 14px rgba(0,0,0,.085)'});
+		}
+	})
+}
+
+const percentBar = function(){
+	let completed = 31;
+	let percent = 0;
+	let percentKeys = [];
+	let centralForm = $('#data_topcampamento_').serializeObject();
+	$.each(centralForm, (k,v) => {
+		if(k != 'id_camp_current' && v){
+			if(k == 'camp_title'){
+				if(v.length >= 3) percent++, percentKeys.push(k); 
+			}else{
+				let property = $("[name='"+k+"']").prop('tagName');
+				if(property == 'TEXTAREA'){
+					if(v.length >= 275) percent++, percentKeys.push(k);
+				}else{
+					if(k.includes('cluecamp')) percentKeys.push(k.split('[')[2].split(']')[0]);
+					if(v.length > 0) percent++, percentKeys.push(k);
+				}
+			}
+		}
+	})
+	let numPercent = (percent / completed) * 100;
+	numPercent = Math.floor(numPercent);
+	let barPercent = $(".container_form_steps .data_topcampamento_ .save_form .progress_bar").outerWidth(true);
+	barPercent = Math.floor((Math.round(barPercent) / 100) * numPercent);
+	if(numPercent > 0){
+		$(".container_form_steps .data_topcampamento_ .save_form .progress_bar").css({background: '#f30c0c59', transition: '.3s'})
+		$(".container_form_steps .data_topcampamento_ .save_form .progress_bar .percent").css({color: '#f30c0c', background: '#f30c0c42', transition: '.3s'})
+	}else{
+		$(".container_form_steps .data_topcampamento_ .save_form .progress_bar").css({background: '#bbb', transition: '.3s'})
+		$(".container_form_steps .data_topcampamento_ .save_form .progress_bar .percent").css({color: '#444', background: '#bbb', transition: '.3s'})
+	}
+	$(".container_form_steps .data_topcampamento_ .save_form .progress_bar .percent p").text(numPercent)
+	$(".container_form_steps .data_topcampamento_ .save_form .progress_bar .unick_bar").css({width: barPercent})
+	console.log(percentKeys)
+	
+}
+
+jQuery(document).ready( function($) {
+
+	$(".overlay_custom_dropify").addClass('disable');
+
+
+	$(".login-form").on("submit", function(e){
+		$(".exito-login").slideUp();
+		if($("#username").val() == "" && $("#password").val() == ""){
+			e.preventDefault();
+			$(".error-login").html("Por favor ingrese su usuario y contraseña").slideDown().delay(2000).slideUp();
+			return false;
+		}
+		if($("#username").val() == ""){
+			e.preventDefault();
+			$(".error-login").html("Por favor ingrese un usuario valido").slideDown().delay(2000).slideUp();
+			return false;
+		}
+		if($("#password").val() == ""){
+			e.preventDefault();
+			$(".error-login").html("Por favor ingrese su contraseña").slideDown().delay(2000).slideUp();
+			return false;
+		}
+	})
+
+	$(".recovery-form").on("submit", function(e){
+		$(".exito-login").slideUp();
+		if($("#password-2").val() == "" && $("#password").val() == ""){
+			e.preventDefault();
+			$(".error-login").html("Por favor rellene todo los campos").slideDown().delay(2000).slideUp();
+			return false;
+		}
+		if($("#password").val() != $("#password-2").val()){
+			e.preventDefault();
+			$(".error-login").html("Contraseñas no coinciden").slideDown().delay(2000).slideUp();
+			return false;
+		}
+	})
+
+	$("#user_select").change(function(e){
+		if($("#oper_dates").length ){
+			if($("#_user").length && $(this).val()){
+				$("#_user").val($(this).val());
+			}else if($("#_user").length && !$(this).val()){
+				$("#_user").remove();
+			}else if(!$("#_user").length && $(this).val()){
+				$("#oper_dates").prepend("<input type='hidden' name='u' value='"+$(this).val()+"' />");
+			}
+			$("#oper_dates").submit()
+		}else if($(this).val()){
+			window.location.href = window.location.origin + window.location.pathname + "?u=" + $(this).val();
+		}else{
+			window.location.href = window.location.origin + window.location.pathname;
+		}
+		
+	})
+
+	$("#panel_user_search").click(function(e){
+		$(".fond-charge").fadeIn();
+	})
+
+	$(".change_user").click(function(e){
+		$(".modal-user").fadeIn();
+	})
+
+	$(".modal-user-cont span").click(function(e){
+		$(".modal-user").fadeOut();
+	})
+
+	$(".register-form").on("submit", function(e){
+		$(".exito-login").slideUp();
+		if($("#password2").val() == "" || $("#password").val() == "" || $("#username").val() == ""){
+			e.preventDefault();
+			$(".error-login").html("Por favor rellene todo los campos").slideDown().delay(2000).slideUp();
+			return false;
+		}
+
+		if($("#username").val() == "" || $("#username").val().length < 6){
+			e.preventDefault();
+			$(".error-login").html("Por favor ingrese un usuario valido de al menos 6 caracteres").slideDown().delay(2000).slideUp();
+			return false;
+		}
+		if($("#password").val() == "" || $("#password").val().length < 6){
+			e.preventDefault();
+			$(".error-login").html("Por favor ingrese una contraseña valida de al menos 6 caracteres").slideDown().delay(2000).slideUp();
+			return false;
+		}
+
+		if($("#password").val() != $("#password2").val()){
+			e.preventDefault();
+			$(".error-login").html("Contraseñas no coinciden").slideDown().delay(2000).slideUp();
+			return false;
+		}
+
+		if(!$("#aceptar").prop("checked")){
+			e.preventDefault();
+			$(".error-login").html("Debe leer y aceptar nuestra políticas de privacidad").slideDown().delay(2000).slideUp();
+			return false;
+		}
+	})
+
+	$(".error-login, .exito-login").click(function(e){
+		$(this).slideUp();
+	});
+
+	$(".date-input").datepicker({
+		autoClose: true,
+		format: "dd-mm-yyyy",
+		setDefaultDate: true,
+	});
+
+	$("#registro_campamentos").DataTable({
+		"pageLength": 10,
+		"order": [[ 0, "desc" ]],
+      	"language": {
+			"lengthMenu" : "Mostrando _MENU_ registros por página",
+			"zeroRecords": "No hay registros por mostrar",
+			"info"       : "Mostrando _PAGE_ de _PAGES_",
+			"infoEmpty"  : "Sin registros en este momento",
+			"search"     : "Buscar",
+			"paginate": {
+				"first":      "Primera",
+				"last":       "Ultima",
+				"next":       "Siguiente",
+				"previous":   "Anterior"
+			}
+		}
+    });
+
+    $("#retirar").submit(function(e){
+    	e.preventDefault();
+    	var cant = $("#retirar_cant").val();
+    	$("#retirar_btn").prop( "disabled", true );
+    	$("#retirar_cant").prop( "disabled", true );
+    	$.ajax({
+		  type: "POST",
+		  url: "#",
+		  data: {
+		  	Xsolc: cant
+		  },
+		  error: function(data){
+		  	$("#retirar_btn").prop( "disabled", false );
+    		$("#retirar_cant").prop( "disabled", false );
+    		swal({title: "No completado intente mas tarde", icon: "error"});
+		  },
+		  success: function(data){
+		  	window.location.reload();
+		  }
+		});
+    })
+
+	if($(".charts-blanc").length) Chart.defaults.global.defaultFontColor='#fff';
+
+	$(".charts").each(function(k,v){
+		var labels = JSON.parse($(v).attr("data-labels"));
+		var datos = JSON.parse($(v).attr("data-datos"));
+		var fondo = $(v).attr("data-fondo");
+		var line = $(v).attr("data-line");
+		var type = $(v).attr("data-type");
+		var label = $(v).attr("data-label");
+		var currency = $(v).attr("data-currency");
+		var ctx = $(v)[0].getContext('2d');
+		var myChart = new Chart(ctx, {
+		    type: type,
+		    data: {
+		        labels: labels,
+		        datasets: [{
+		            label: label,
+		            data: datos,
+		            backgroundColor: fondo,
+		            borderColor: line,
+		            borderWidth: 1
+		        }]
+		    },
+		    options: {
+		        scales: {
+		            y: {
+		                beginAtZero: true,
+		            },
+		            yAxes: [{
+			        	ticks: {
+							beginAtZero: true,
+							stepSize: 1,
+			           		callback: function(value, index, values) {
+			           			if(currency == 1) return value.toLocaleString("es-ES",{style:"currency", currency:"EUR"});
+			           			return value;
+			            	}
+			         	}
+			       	}]
+		        }
+		    }
+		});
+	})
+
+	$(".botonr .dots").click(function(e){
+		if(!$(this).hasClass('disable')){
+			steps_form($(this))
+		}
+	})
+
+	$('.dropify').dropify();
+
+	$("button[act='add_camp']").click(function(e){
+		e.preventDefault()
+		let topcamp = 'topcamp';
+		window.location.href += '?'+topcamp+'=true&';
+	})
+
+	//array data camps//
+	let imgDataCurrentTop = [];
+	//array data camps//
+
+	$('[act="custom_dropify_ajax"]').click(function(e){
+		localStorage.setItem("custom_dropify_ajax", $(this).attr('class'));
+		$(".overlay_custom_dropify").removeClass('disable');
+		$("body").css({overflow: 'hidden'});
+		loader($(".overlay_custom_dropify .content"), 'media_loader_panel');
+		$.ajax({
+			type: "POST",
+			url: AjaxUrl,
+			dataType: 'json',
+			action: "admin_panel",
+			data: {
+				action: "admin_panel",
+				getAttach: 2,
+			},
+			error: function(rsp){
+				alert("Error en el servidor, intente más tarde");
+			},
+			success: function(rsp) {
+				if(rsp.r){
+					loaderEnd($(".overlay_custom_dropify .content"), 'media_loader_panel')
+					if($(".overlay_custom_dropify .photos .content_photos").hasClass('empty')){
+						$(".overlay_custom_dropify .photos .content_photos").removeClass('empty');
+						$(".overlay_custom_dropify .photos .content_photos .message_error_content_photos").remove();
+					}
+					if(imgDataCurrentTop.length == 0){
+						$.each(rsp.attach_id, (k,v)=>{
+							imgDataCurrentTop[k] = v;
+						})
+						$.each(imgDataCurrentTop, (k, v)=>{
+							printMediaCurrentUser(k, v);
+						})
+					}
+					
+				}else{
+					loaderEnd($(".overlay_custom_dropify .content"), 'media_loader_panel')
+					if(!$(".overlay_custom_dropify .photos .content_photos").hasClass('empty')){
+						$(".overlay_custom_dropify .photos .content_photos").addClass('empty');
+						$(".overlay_custom_dropify .photos .content_photos").append(`
+							<div class="message_error_content_photos">
+								<i class="material-icons icon-menu">error</i>
+								<p>${rsp.m}</p>
+							</div>`);
+					}
+				}
+			}
+		})
+	})
+
+	$(document).on('click', '.photos .content_photos .container_image_current_user_adpnsy', function(){
+		let url_crrnt_photo = $(this).find('img').attr('src');
+		let alt_crrnt_photo = $(this).find('img').attr('alt');
+		let id_crrnt_photo = $(this).find('img').attr('acgt');
+
+		// media_slider_camps
+		// img_portada_camp
+		$(".min_modal_hyperUniKck").find('img').attr('src', url_crrnt_photo);
+		$(".min_modal_hyperUniKck").find('img').attr('alt', alt_crrnt_photo);
+		$(".min_modal_hyperUniKck").find('img').attr('acgt', id_crrnt_photo);
+		$(".min_modal_hyperUniKck").addClass('active');
+	})
+
+	$(".btnr_content_hyperUnicKck .btn_hyper_this.apply").click(function(e){
+		let url_crrnt_photo = $(".min_modal_hyperUniKck").find('img').attr('src');
+		let alt_crrnt_photo = $(".min_modal_hyperUniKck").find('img').attr('alt');
+		let id_crrnt_photo = $(".min_modal_hyperUniKck").find('img').attr('acgt');
+		let deter_custom_dropify = localStorage.getItem("custom_dropify_ajax");
+		let imgs_dorpi = $(`<span class="content_dropify_custom_insert" iacgt="${id_crrnt_photo}">
+								<img src="${url_crrnt_photo}" alt="${alt_crrnt_photo}" acgt="${id_crrnt_photo}">
+								<input class="hidden_photo" type="hidden" name="foto" value="${url_crrnt_photo}">
+								<i class="material-icons icon-menu quit_dropify_custom portrait" iacgt="${id_crrnt_photo}">close</i>
+							</span>`);
+		let imgs_dorpi_not = $(`<span class="content_dropify_custom_insert" iacgt="${id_crrnt_photo}">
+			<img src="${url_crrnt_photo}" alt="${alt_crrnt_photo}" acgt="${id_crrnt_photo}">
+			<input class="hidden_photo" type="hidden" name="instalaciones[]" value="${url_crrnt_photo}">
+			<i class="material-icons icon-menu quit_dropify_custom" iacgt="${id_crrnt_photo}">close</i>
+		</span>`);
+		if(deter_custom_dropify == 'img_portada_camp'){
+			$(".img_portada_camp[act='custom_dropify_ajax']").append(imgs_dorpi);
+			percentBar()
+		}else{
+			let content_imgs_dropicustom = $('<div class="container_dropify_custom_insert"></div>');
+			if(!$(".container_dropify_custom_insert").length) $(".media_slider_camps[act='custom_dropify_ajax']").append(content_imgs_dropicustom);
+			$(".container_dropify_custom_insert").append(imgs_dorpi_not);
+			percentBar()
+		}
+
+		$(".overlay_custom_dropify").addClass('disable');
+		$("body").css({overflow: ''});
+		$(".upload_images").hide();
+		$(".photos").show();
+	})
+
+	$('.img_portada_camp').on('click', '.quit_dropify_custom', function(e){
+		e.stopPropagation();
+		percentBar()
+		let parent = $(this).attr('iacgt');
+		$(".content_dropify_custom_insert[iacgt='"+parent+"']").remove();
+	})
+
+	$('.media_slider_camps').on('click', '.quit_dropify_custom', function(e){
+		e.stopPropagation();
+		percentBar()
+		let parent = $(this).attr('iacgt');
+		$(".content_dropify_custom_insert[iacgt='"+parent+"']").remove();
+		if(!$(".container_dropify_custom_insert .content_dropify_custom_insert").length) $(".container_dropify_custom_insert").remove()
+	})
+
+	$(".min_modal_hyperUniKck, .min_modal_hyperUniKck .close_of_thishyperUniKck, .btnr_content_hyperUnicKck .btn_hyper_this.cancel").click(function(e){
+		$(".min_modal_hyperUniKck").removeClass('active');
+	})
+
+	$('.content .close_custom_dropify').click(function(){
+		$(".overlay_custom_dropify").addClass('disable');
+		$("body").css({overflow: ''});
+		$(".upload_images").hide();
+		$(".photos").show();
+	})
+
+	$("#custom_dropify_adpnsy .save_custom_dropify").click(function(e){
+		e.preventDefault();
+		let dropify_custom = $("#custom_dropify_adpnsy");
+		let secs = dropify_custom.serializeObject();
+		if(secs.nombre_img && $("#custom_dropify_adpnsy #img_custom_panel_camp").val()){
+			let theData = new FormData(dropify_custom[0]);
+			theData.append('action', 'admin_panel');
+			theData.append('GET_IMAGEN', 1);
+			loader($(".overlay_custom_dropify .content"), 'media_loader_panel');
+			$.ajax({
+				type: "POST",
+				url: AjaxUrl,
+				dataType: 'json',
+				data: theData,
+				cache: false,
+				contentType: false,
+				processData: false,
+				error: function(rsp){
+					alert("Error al llamar al API");
+				},
+				success: function(rsp) {
+					if(rsp.r){
+						loaderEnd($(".overlay_custom_dropify .content"), 'media_loader_panel');
+						$("#custom_dropify_adpnsy").trigger('reset');
+						$("#custom_dropify_adpnsy .dropify-clear").trigger('click');
+						$(".container_image_current_user_adpnsy").remove();
+						imgDataCurrentTop.unshift({
+							'id': rsp.d,
+							'url': rsp.url,
+							'title': secs.nombre_img,
+						})
+						$.each(imgDataCurrentTop, (k, v)=>{
+							printMediaCurrentUser(k, v);
+						})
+						$(".upload_images").hide();
+						$(".photos").show();			
+					}else{
+						alert(rsp.m);
+					}
+				}
+			})
+		}else{
+			$("#custom_dropify_adpnsy").find("input[required]").each((k,v)=>{
+				if(!$(v).val()) $(v).addClass('invalid');
+				if($(v).hasClass('dropify') && !$(v).val()) $("#custom_dropify_adpnsy").find('.dropify-wrapper').addClass('invalid')
+			})
+			setTimeout(()=>{
+				alert('Por favor complete los campos requeridos');
+			}, 250)
+		}	
+	})
+
+	$("body").on('click', '.close_media_current_user', (e)=>{
+		e.stopPropagation();
+		let img_dlt = e.target;
+		img_dlt = $(img_dlt).attr('dlt');
+		let message_confirm = '¿Esta seguro de elimnar la imagen? (una vez eliminada, no se podra deshacer la acción)';
+		alert_confirm(message_confirm, ()=>{
+			loader($(".overlay_custom_dropify .content"), 'media_loader_panel');
+			$(".container_image_current_user_adpnsy").remove();
+			$.ajax({
+				type: "POST",
+				url: AjaxUrl,
+				dataType: 'json',
+				action: "admin_panel",
+				data: {
+					action: "admin_panel",
+					dltAttach: 3,
+					id_dlt: img_dlt,
+				},
+				error: function(rsp){
+					alert("Error en el servidor, intente más tarde");
+				},
+				success: function(rsp) {
+					if(rsp.r){
+						loaderEnd($(".overlay_custom_dropify .content"), 'media_loader_panel')
+						$.each(rsp.attach_id , (k, v)=>{
+							printMediaCurrentUser(k, v);
+						})
+					}else{
+						loaderEnd($(".overlay_custom_dropify .content"), 'media_loader_panel')
+						alert(rsp.m);
+					}
+				}
+			})
+		})
+	})
+
+	$(".upload_images").hide();
+	$(".add_photo [act='show_upload_image']").click(function(e){
+		e.preventDefault();
+		loader($(".overlay_custom_dropify .content"), 'media_loader_panel');
+		setTimeout(()=>{
+			$(".photos").hide();
+			loaderEnd($(".overlay_custom_dropify .content"), 'media_loader_panel')
+			$(".upload_images").show();
+		}, 1000);
+	})
+
+	$(".back_photos_upload[act='hide_upload_image']").click(function(e){
+		e.preventDefault();
+		loader($(".overlay_custom_dropify .content"), 'media_loader_panel');
+		setTimeout(()=>{
+			$(".upload_images").hide();
+			loaderEnd($(".overlay_custom_dropify .content"), 'media_loader_panel')
+			$(".photos").show();
+		}, 1000);
+	})
+
+	$("#data_topcampamento_ .add_data_clue[act='add_data_clue_camp']").click(function(e){
+		e.preventDefault();
+		let cdId = $("#data_topcampamento_ .data_clue .container_data_clue_inside .content_data_clue:last").attr('cd');
+		cdId = parseInt(cdId) + 1;
+		let keyImplementJs = Date.now();
+		keyImplementJs = keyImplementJs.toString();
+		keyImplementJs = keyImplementJs.slice(-13);
+		let EL = $(`<div class="content_data_clue" cd="${cdId}">
+		<button class="quit_data_clue" act="dlt_data_clue" cd="${cdId}">
+			<i class="material-icons icon-menu">close</i>
+		</button>
+		<div class="clues">
+			<input type="text" class="date-input" name="cluecamp[${keyImplementJs}][fecha_inicio]" required placeholder="Fecha inicial de tu campamento *" >
+		</div>
+		<div class="clues">
+			<input type="text" class="date-input" name="cluecamp[${keyImplementJs}][fecha_final]" required placeholder="Fecha final de tu campamento *" >
+		</div>
+		<div class="clues">
+			<input type="number" name="cluecamp[${keyImplementJs}][precio]" required placeholder="Precio *" >
+		</div>
+		<div class="clues">
+			<select name="cluecamp[${keyImplementJs}][temporada]" class="select_insert_dom_materialize" topval="mes-temporada" required>
+				<option value="" selected disabled >Temporada</option>
+			</select>                    
+		</div>
+		<div class="clues">
+			<select name="cluecamp[${keyImplementJs}][duracion]" class="select_insert_dom_materialize" topval="duracion" required>
+				<option value="" selected disabled >Duración</option>
+			</select>                    
+		</div>
+		<div class="clues">
+			<select name="cluecamp[${keyImplementJs}][edades]" class="select_insert_dom_materialize" topval="edades" required>
+				<option value="" selected disabled >Edades | </option>
+			</select> 
+		</div>
+		<div class="clues">
+			<input type="number" name="cluecamp[${keyImplementJs}][plazas_num]" required placeholder="Plazas *" >                 
+		</div>
+					</div>`);
+		$("#data_topcampamento_ .data_clue .container_data_clue_inside").append(EL);
+		EL.find('.date-input').each(function(k, v) {
+			$(v).datepicker();
+		})
+		EL.find('.select_insert_dom_materialize').each(function(k, v) {
+			if($(v).attr("topval") == 'duracion'){
+				$.each(duracion, function(nk,nv){
+					$(v).append(`<option value='${nv.id}'>${nv.value}</option>`);
+				})
+			}
+
+			if($(v).attr("topval") == 'mes-temporada'){
+				$.each(temporada, function(nk,nv){
+					$(v).append(`<option value='${nv.id}'>${nv.value}</option>`);
+				})
+			}
+
+			if($(v).attr("topval") == 'edades'){
+				$.each(edades, function(nk,nv){ 
+					$(v).append(`<option value='${nv.id}'>${nv.value}</option>`);
+				})
+			}
+
+			$(v).formSelect();
+		})
+	})
+
+	$("#data_topcampamento_ .save_form button").click(function(e){
+		e.preventDefault();
+		let theCampForm = $("#data_topcampamento_").serializeObject();
+		let vaAjax = true;
+		if($("input[name='camp_title']").val().length < 7){
+			alert('El nombre de tu campamento debe tener al menos 3 caracteres');
+			return;
+		}
+
+		$(".data_topcampamento_ textarea.materialize-textarea").each((k,v)=>{
+			if($(v).val() && $(v).val().length < 250){
+				alert('La descripción introducida es muy corta');
+				vaAjax = false;
+			} 
+		})
+
+		if(vaAjax){
+			$.ajax({
+				type: "POST",
+				url: AjaxUrl + '?action=admin_panel&GET_DATA_=5',
+				dataType: 'json',
+				cache: false,
+				contentType: false,
+				processData: false,
+				data: formData,
+				error: function(rsp){
+					alert("Error en el servidor, intente más tarde");
+				},
+				success: function(rsp) {
+					if(rsp.r){
+						console.log(rsp)
+						let cers = (rsp.ce) ? 'creado' : 'editado';
+						alert(`Se ha ${cers} exitosamente el campamento!`, true);
+						$("#data_topcampamento_").trigger("reset");
+						$("body .quit_dropify_custom").each((k,v)=>{
+							$(v).trigger("click");
+						})
+					}else{
+						$.each(rsp.mensajes, (k, v) => {
+							alert(v)
+						})
+					}
+				}
+			})	
+		}
+
+	})
+
+	$(".camps_acts .btns_acts_camps").click(function(e){
+		e.preventDefault();
+		let camp_edit = $(this).attr('act');
+		let edit_camp = 'edit_campamento';
+		let topcamp = 'topcamp';
+		window.location.href += '?'+topcamp+'=true&'+edit_camp+'='+camp_edit;
+	})
+
+	$(document).on("click", ".quit_data_clue[act='dlt_data_clue']", function(e){
+		e.preventDefault();
+		let clue_dlt = $(this).attr('cd');
+		$(".content_data_clue[cd='"+clue_dlt+"']").remove();
+	})	
+
+	move_save_progress_camps()
+
+	$(window).on('resize', (e)=>{
+		move_save_progress_camps()
+	})
+
+	
+	percentBar()
+
+
+	$("#data_topcampamento_ input, #data_topcampamento_ textarea").on('input', (e) => {
+		let currentElement = e.target;
+		if($(currentElement).prop('tagName') == 'INPUT'){
+			($(currentElement).val()) ? percentBar(): null;
+		}else{
+			if($(currentElement).val()) percentBar();
+		}
+	})
+
+	$("#data_topcampamento_ select").on('change', (e) => {
+		let currentElement = e.target;
+		($(currentElement).val()) ? percentBar(): null;
+	})
+
+
+	$(window).scroll(()=>{
+		move_save_progress_camps()
+	})
+
+	$('#data_topcampamento_ textarea').characterCounter();
+
+});
